@@ -1,0 +1,1 @@
+print("TESTAUSGABE IM DOCKER")
