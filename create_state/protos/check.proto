@@ -1,0 +1,17 @@
+syntax = "proto3";
+package IC20.Modules.GrpcService.Protos;
+
+// The execute command request message.
+message ExecuteRequest {
+    // Provides the properties to use
+    map<string, string> properties = 1;
+}
+
+// The Execute response message.
+message ExecuteResponse {
+    // True if the command was executed successfully
+    bool success = 1;
+
+    // The list of errors if command was not executed successfully
+    repeated string errors = 4;
+}

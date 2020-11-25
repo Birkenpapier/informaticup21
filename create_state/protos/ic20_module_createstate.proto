@@ -1,0 +1,18 @@
+syntax = "proto3";
+package IC20.Modules.GrpcService.Protos;
+import "check.proto";
+
+// The module service definition.
+service Module_CreateState {
+    // Sends an Execute command
+    rpc create_state (create_state_Params) returns (State) {}
+    rpc Initialize (ExecuteRequest) returns (ExecuteResponse) {}
+}
+
+message State {
+    string state = 1;
+}
+
+message create_state_Params {
+    string StateInit = 1;
+}
