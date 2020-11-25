@@ -1,6 +1,7 @@
 import pygame
 from random import randint
-from drl_agent.DQN import DQNAgent
+# from drl_agent.DQN import DQNAgent
+from DQN import DQNAgent
 import numpy as np
 from keras.utils import to_categorical
 import matplotlib.pyplot as plt
@@ -77,3 +78,4 @@ def run(game):
     plot_seaborn(counter_plot, score_plot)
 
 
+run()

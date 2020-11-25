@@ -176,7 +176,7 @@ def run():
     import tensorflow as tf
 
     # os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-    os.environ['CUDA_VISIBLE_DEVICES'] = ''
+    # os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
     if tf.test.gpu_device_name():
         print('[DEBUG] GPU found')
