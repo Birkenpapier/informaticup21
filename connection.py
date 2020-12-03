@@ -19,7 +19,7 @@ class GameState:
 		
 	def getPlayers(self, player_list):
 		ret = []
-		id = 1;
+		id = 1
 		while True:
 			try:
 				ret.append(self.Player(id, player_list[str(id)]))
