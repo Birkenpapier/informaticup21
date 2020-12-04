@@ -49,9 +49,14 @@ async def connection():
 	
 		print("Waiting for initial state...", flush=True)
 		print("PRIOR game ready: TIME: ", datetime.now(), flush=True)
+		
+		started = False
 
 		while True:
 			ans = await ws.recv()
+			
+			if not started : started = True
+			
 			state = GameState(json.loads(ans))
 			
 			if not state.running :
