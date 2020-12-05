@@ -334,7 +334,7 @@ class Snake(gym.Env):
                     int(wall_up or body_up), int(wall_right or body_right), int(wall_down or body_down), int(wall_left or body_left), \
                     int(self.snake.direction == 'up'), int(self.snake.direction == 'right'), int(self.snake.direction == 'down'), int(self.snake.direction == 'left')]
             
-        # print(state) # state of the current step of the game
+        #print(state) # state of the current step of the game
 
         return state
 
