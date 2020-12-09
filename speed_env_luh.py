@@ -14,13 +14,6 @@ URI = "wss://msoll.de/spe_ed?key=LSIS7VOFLXCISR3K4YUSZ3CN2Z3CF74PEB7EKE4AQ7PDVKA
 
 HEIGHT = 20      # number of steps vertically from wall to wall of screen
 WIDTH = 20       # number of steps horizontally from wall to wall of screen
-PIXEL_H = 20*HEIGHT  # pixel height + border on both sides
-PIXEL_W = 20*WIDTH   # pixel width + border on both sides
-
-SLEEP = 0.2     # time to wait between steps
-
-GAME_TITLE = 'Snake'
-BG_COLOR = 'white'
 
 SNAKE_SHAPE = 'square'
 SNAKE_COLOR = 'black'
@@ -31,51 +24,52 @@ APPLE_SHAPE = 'circle'
 APPLE_COLOR = 'green'
 
 
-
-class GameState:
-	def __init__(self, data):
-		print(data) # print the received json
-		self.width = data['width']
-		self.height = data['height']
-		self.cells = data['cells']
-		self.pl = data['players']
-		self.players = self.get_players(data['players'])
-		self.you = data['you']
-		self.running = data['running']
-		try:
-			self.deadline = data['deadline']
-		except KeyError:
-			self.deadline = ''
-		
-	def get_players(self, player_list):
-		ret = []
-		id = 1
-		while True:
-			try:
-				ret.append(self.Player(id, player_list[str(id)]))
-			except KeyError:
-				break
-			id += 1
-		return ret
-		
-	class Player:
-		def __init__(self, id, info):
-			self.id = id
-			self.x = info['x']
-			self.y = info['y']
-			self.direction = info['direction']
-			self.speed = info['speed']
-			self.active = info['active']
-			#self.name = info['name'] nicht notwendig
-	
-		def display(self):
-			print(self.id, ': ', self.x, self.y, self.direction, self.speed, self.active)
+class GameState():
+    def __init__(self, data):
+        print(data) # print the received json
+        self.width = data['width']
+        self.height = data['height']
+        self.cells = data['cells']
+        self.pl = data['players']
+        self.players = self.get_players(data['players'])
+        self.you = data['you']
+        self.running = data['running']
+        try:
+            self.deadline = data['deadline']
+        except KeyError:
+            self.deadline = ''
+        
+    def get_players(self, player_list):
+        ret = []
+        id = 1
+        while True:
+            try:
+                ret.append(Player(id, player_list[str(id)]))
+            except KeyError:
+                break
+            id += 1
+        return ret
 
 
-class Snake(gym.Env):
+class Player():
+    def __init__(self, id, info):
+        self.id = id
+        self.x = info['x']
+        self.y = info['y']
+        self.direction = info['direction']
+        self.speed = info['speed']
+        self.active = info['active']
+        # self.name = info['name'] # nicht notwendig
 
-    def __init__(self, human=False, env_info={'state_space':None}):
-        # super(Snake, self).__init__() # can be removed because we don't need the game implementation
+    def display(self):
+        print(self.id, ': ', self.x, self.y, self.direction, self.speed, self.active)
+
+
+class Speed(gym.Env):
+    def __init__(self, data, human=False, env_info={'state_space' : None}):
+        self.gamestate = GameState(data)
+        
+        #########
 
         self.done = False
         self.seed() # check why this is used
@@ -84,29 +78,34 @@ class Snake(gym.Env):
         self.state_space = 13 # changed from 12 -> 13 because we have 13 nececessary information about state 
 
         self.total, self.maximum = 0, 0
-        # self.human = human # a human will not play this game
         self.env_info = env_info
 
-        ## GAME CREATION WITH TURTLE (RENDER?)
-        # screen/background and that is the reason why we won't need this
-        # self.win = turtle.Screen()
-        # self.win.title(GAME_TITLE)
-        # self.win.bgcolor(BG_COLOR)
-        # self.win.tracer(0)
-        # self.win.setup(width=PIXEL_W+32, height=PIXEL_H+32)
                 
         # snake
-        self.snake = turtle.Turtle()
-        self.snake.shape(SNAKE_SHAPE)
-        self.snake.speed(0)
-        self.snake.penup()
-        self.snake.color(SNAKE_COLOR)
-        self.snake.goto(SNAKE_START_LOC_H, SNAKE_START_LOC_V)
-        self.snake.direction = 'stop'
-        # snake body, add first element (for location of snake's head)
-        self.snake_body = []
-        self.add_to_body()
+        # self.snake = turtle.Turtle()
+        # self.snake.shape(SNAKE_SHAPE)
+        # self.snake.speed(0)
+        # self.snake.penup()
+        # self.snake.color(SNAKE_COLOR)
+        # self.snake.goto(SNAKE_START_LOC_H, SNAKE_START_LOC_V)
+        # self.snake.direction = 'stop'
+        # self.snake_body = [] # snake body, add first element (for location of snake's head)
+        # self.add_to_body() # graphical function for adding the eated apple to body
 
+        # self.snake = turtle.Turtle() # self.GameState.Player()
+        self.player = self.gamestate.players[int(self.gamestate.you)] # self.GameState.Player()
+        self.snake_body = [] # snake body, add first element (for location of snake's head)
+        # self.add_to_body() # graphical function for adding the eated apple to body
+
+        # apple
+        # self.apple = turtle.Turtle()
+        # self.apple.speed(0)
+        # self.apple.shape(APPLE_SHAPE)
+        # self.apple.color(APPLE_COLOR)
+        # self.apple.penup()
+        # sself.move_apple(first=True)
+        
+        # TODO: implement here all the enemys
         # apple
         self.apple = turtle.Turtle()
         self.apple.speed(0)
@@ -118,32 +117,18 @@ class Snake(gym.Env):
         # distance between apple and snake
         self.dist = math.sqrt((self.snake.xcor()-self.apple.xcor())**2 + (self.snake.ycor()-self.apple.ycor())**2)
 
-        # don't need this because we don't render the game
-        # score
-        # self.score = turtle.Turtle()
-        # self.score.speed(0)
-        # self.score.color('black')
-        # self.score.penup()
-        # self.score.hideturtle()
-        # self.score.goto(0, 100)
-        # self.score.write(f"Total: {self.total}   Highest: {self.maximum}", align='center', font=('Courier', 18, 'normal'))
-
-        # control
-        # self.win.listen()
-        # self.win.onkey(self.go_up, 'Up')
-        # self.win.onkey(self.go_right, 'Right')
-        # self.win.onkey(self.go_down, 'Down')
-        # self.win.onkey(self.go_left, 'Left')
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
+
 
     def random_coordinates(self):
         apple_x = random.randint(-WIDTH/2, WIDTH/2)
         apple_y = random.randint(-HEIGHT/2, HEIGHT/2)
         return apple_x, apple_y
     
+
     def move_snake(self):
         if self.snake.direction == 'stop':
             self.reward = 0
@@ -189,27 +174,10 @@ class Snake(gym.Env):
                 if not self.body_check_apple():
                     break
             if not first:
-                # self.update_score()
                 self.add_to_body()
             first = False
             return True
 
-
-    """
-    def update_score(self):
-        self.total += 1
-        if self.total >= self.maximum:
-            self.maximum = self.total
-        self.score.clear()
-        self.score.write(f"Total: {self.total}   Highest: {self.maximum}", align='center', font=('Courier', 18, 'normal'))
-    """
-    
-    """
-    def reset_score(self):
-        self.score.clear()
-        self.total = 0
-        self.score.write(f"Total: {self.total}   Highest: {self.maximum}", align='center', font=('Courier', 18, 'normal'))
-    """             
 
     def add_to_body(self):
         body = turtle.Turtle()
@@ -242,20 +210,21 @@ class Snake(gym.Env):
                     # self.reset_score()
                     return True     
 
+
     def body_check_apple(self):
         if len(self.snake_body) > 0:
             for body in self.snake_body[:]:
                 if body.distance(self.apple) < 20:
                     return True
 
+
     def wall_check(self):
         if self.snake.xcor() > 200 or self.snake.xcor() < -200 or self.snake.ycor() > 200 or self.snake.ycor() < -200:
             # self.reset_score()
             return True
     
+
     def reset(self):
-        # if self.human:
-             # time.sleep(1)
         for body in self.snake_body:
             body.goto(1000, 1000)
 
@@ -273,7 +242,6 @@ class Snake(gym.Env):
 
     def run_game(self):
         reward_given = False
-        # self.win.update()
         self.move_snake()
         
         if self.move_apple():
@@ -288,29 +256,18 @@ class Snake(gym.Env):
             reward_given = True
             self.done = True
         
-            # if self.human:
-                # self.reset()
-        
         if self.wall_check():
             self.reward = -100
             reward_given = True
             self.done = True
-        
-            # if self.human:
-                # self.reset()
-        
+
         if not reward_given:
             if self.dist < self.prev_dist:
                 self.reward = 1
             else:
                 self.reward = -1
-        # time.sleep(0.1)
-        
-        # if self.human:
-            # time.sleep(SLEEP)
-            # state = self.get_state()
 
-    
+
     # AI agent
     def step(self, action):
         if action == 0:
@@ -397,11 +354,6 @@ class Snake(gym.Env):
 
         return state
 
-    """
-    def bye(self):
-        self.win.bye()
-    """
-
 
 
 async def connection():
@@ -418,9 +370,10 @@ async def connection():
 			
 			if not started : started = True
 			
-			state = GameState(json.loads(ans))
-			
-			if not state.running :
+			# state = Speed.GameState(json.loads(ans))
+			state = Speed(json.loads(ans))
+			# print(state.gamestate.players)
+			if not state.gamestate.running:
 				break
 			
 			action = "speed_up"
@@ -438,7 +391,7 @@ asyncio.get_event_loop().run_until_complete(connection())
 """
 if __name__ == '__main__':            
     human = True
-    env = Snake(human=human)
+    env = Speed(human=human)
 
     if human:
         while True:
