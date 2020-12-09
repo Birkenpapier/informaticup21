@@ -7,7 +7,7 @@ uri = "wss://msoll.de/spe_ed?key=LSIS7VOFLXCISR3K4YUSZ3CN2Z3CF74PEB7EKE4AQ7PDVKA
 
 class GameState:
 	def __init__(self, data):
-		print(data)
+		print(data) # print the received json
 		self.width = data['width']
 		self.height = data['height']
 		self.cells = data['cells']
