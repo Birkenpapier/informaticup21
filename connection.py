@@ -63,13 +63,12 @@ async def connection():
 			if not state.running :
 				break
 			
-			action = "speed_up"
+			action = "turn_left"
 			action_json = json.dumps({"action": action})
 			await ws.send(action_json)
 			print("Action sent: ", action)
 			
 	
 	print("AFTER game ready: TIME: ", datetime.now(), flush=True)
-	
-		
+
 asyncio.get_event_loop().run_until_complete(connection())
