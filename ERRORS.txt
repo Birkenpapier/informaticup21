@@ -62,3 +62,40 @@ Traceback (most recent call last):
   File "/home/kevin/anaconda3/lib/python3.8/site-packages/websockets/protocol.py", line 803, in ensure_open
     raise self.connection_closed_exc()
 websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+
+
+Traceback (most recent call last):
+  File "C:\Users\Max\AppData\Local\Programs\Python\Python39\lib\site-packages\websockets\protocol.py", line 827, in transfer_data
+    message = await self.read_message()
+  File "C:\Users\Max\AppData\Local\Programs\Python\Python39\lib\site-packages\websockets\protocol.py", line 895, in read_message
+    frame = await self.read_data_frame(max_size=self.max_size)
+  File "C:\Users\Max\AppData\Local\Programs\Python\Python39\lib\site-packages\websockets\protocol.py", line 971, in read_data_frame
+    frame = await self.read_frame(max_size)
+  File "C:\Users\Max\AppData\Local\Programs\Python\Python39\lib\site-packages\websockets\protocol.py", line 1047, in read_frame
+    frame = await Frame.read(
+  File "C:\Users\Max\AppData\Local\Programs\Python\Python39\lib\site-packages\websockets\framing.py", line 133, in read
+    data = await reader(length)
+  File "C:\Users\Max\AppData\Local\Programs\Python\Python39\lib\asyncio\streams.py", line 723, in readexactly
+    await self._wait_for_data('readexactly')
+  File "C:\Users\Max\AppData\Local\Programs\Python\Python39\lib\asyncio\streams.py", line 517, in _wait_for_data
+    await self._waiter
+  File "C:\Users\Max\AppData\Local\Programs\Python\Python39\lib\asyncio\proactor_events.py", line 395, in _loop_writing
+    self._write_fut = self._loop._proactor.send(self._sock, data)
+  File "C:\Users\Max\AppData\Local\Programs\Python\Python39\lib\asyncio\windows_events.py", line 532, in send
+    ov.WSASend(conn.fileno(), buf, flags)
+ConnectionResetError: [WinError 10054] Eine vorhandene Verbindung wurde vom Remotehost geschlossen
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Max\Documents\Prog2\InformatiCup\connect.py", line 76, in <module>
+    asyncio.get_event_loop().run_until_complete(connection())
+  File "C:\Users\Max\AppData\Local\Programs\Python\Python39\lib\asyncio\base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "C:\Users\Max\Documents\Prog2\InformatiCup\connect.py", line 57, in connection
+    ans = await ws.recv()
+  File "C:\Users\Max\AppData\Local\Programs\Python\Python39\lib\site-packages\websockets\protocol.py", line 509, in recv
+    await self.ensure_open()
+  File "C:\Users\Max\AppData\Local\Programs\Python\Python39\lib\site-packages\websockets\protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
