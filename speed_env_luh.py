@@ -68,14 +68,15 @@ class Player():
 class Speed(gym.Env):
     def __init__(self, data, human=False, env_info={'state_space' : None}):
         self.gamestate = GameState(data)
-        
+        self.returned_action = None
+
         #########
 
         self.done = False
         self.seed() # check why this is used
         self.reward = 0
         self.action_space = 5 # changed from 4 -> 5 because we have choose from 5 actions in total
-        self.state_space = 13 # changed from 12 -> 13 because we have 13 nececessary information about state 
+        self.state_space = 12 # changed from 12 -> 12 because we have 13 nececessary information about state 
 
         self.total, self.maximum = 0, 0
         self.env_info = env_info
@@ -107,6 +108,7 @@ class Speed(gym.Env):
         
         # TODO: implement here all the enemys
         # apple
+        """
         self.apple = turtle.Turtle()
         self.apple.speed(0)
         self.apple.shape(APPLE_SHAPE)
@@ -116,88 +118,13 @@ class Speed(gym.Env):
 
         # distance between apple and snake
         self.dist = math.sqrt((self.snake.xcor()-self.apple.xcor())**2 + (self.snake.ycor()-self.apple.ycor())**2)
-
+        """
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
 
-    def random_coordinates(self):
-        apple_x = random.randint(-WIDTH/2, WIDTH/2)
-        apple_y = random.randint(-HEIGHT/2, HEIGHT/2)
-        return apple_x, apple_y
-    
-
-    def move_snake(self):
-        if self.snake.direction == 'stop':
-            self.reward = 0
-        if self.snake.direction == 'up':
-            y = self.snake.ycor()
-            self.snake.sety(y + 20)
-        if self.snake.direction == 'right':
-            x = self.snake.xcor()
-            self.snake.setx(x + 20)
-        if self.snake.direction == 'down':
-            y = self.snake.ycor()
-            self.snake.sety(y - 20)
-        if self.snake.direction == 'left':
-            x = self.snake.xcor()
-            self.snake.setx(x - 20)
-        
-    
-    def go_up(self):
-        if self.snake.direction != "down":
-            self.snake.direction = "up"
-    
-    
-    def go_down(self):
-        if self.snake.direction != "up":
-            self.snake.direction = "down"
-    
-    
-    def go_right(self):
-        if self.snake.direction != "left":
-            self.snake.direction = "right"
-    
-    
-    def go_left(self):
-        if self.snake.direction != "right":
-            self.snake.direction = "left"
-
-
-    def move_apple(self, first=False):
-        if first or self.snake.distance(self.apple) < 20:    
-            while True:
-                self.apple.x, self.apple.y = self.random_coordinates()
-                self.apple.goto(round(self.apple.x*20), round(self.apple.y*20))
-                if not self.body_check_apple():
-                    break
-            if not first:
-                self.add_to_body()
-            first = False
-            return True
-
-
-    def add_to_body(self):
-        body = turtle.Turtle()
-        body.speed(0)
-        body.shape('square')
-        body.color('black')
-        body.penup()
-        self.snake_body.append(body)
-        
-
-    def move_snakebody(self):
-        if len(self.snake_body) > 0:
-            for index in range(len(self.snake_body)-1, 0, -1):
-                x = self.snake_body[index-1].xcor()
-                y = self.snake_body[index-1].ycor()
-                self.snake_body[index].goto(x, y)
-
-            self.snake_body[0].goto(self.snake.xcor(), self.snake.ycor())
-        
-    
     def measure_distance(self):
         self.prev_dist = self.dist
         self.dist = math.sqrt((self.snake.xcor()-self.apple.xcor())**2 + (self.snake.ycor()-self.apple.ycor())**2)
@@ -224,6 +151,7 @@ class Speed(gym.Env):
             return True
     
 
+    """
     def reset(self):
         for body in self.snake_body:
             body.goto(1000, 1000)
@@ -238,11 +166,11 @@ class Speed(gym.Env):
         state = self.get_state()
 
         return state
-
+    """
 
     def run_game(self):
         reward_given = False
-        self.move_snake()
+        # self.move_snake()
         
         if self.move_apple():
             self.reward = 10
@@ -267,7 +195,7 @@ class Speed(gym.Env):
             else:
                 self.reward = -1
 
-
+    """
     # AI agent
     def step(self, action):
         if action == 0:
@@ -281,8 +209,28 @@ class Speed(gym.Env):
         self.run_game()
         state = self.get_state()
         return state, self.reward, self.done, {}
+    """
+    
+    # AI agent
+    def step(self, action):
+        if action == 0:
+            self.returned_action = 'turn_left'
+        if action == 1:
+            self.returned_action = 'turn_right'
+        if action == 2:
+            self.returned_action = 'slow_down'
+        if action == 3:
+            self.returned_action = 'speed_up'
+        if action == 4:
+            self.returned_action = 'change_nothing'
+        
+        self.run_game() # here is the reward function
 
+        state = self.get_state_speed()
 
+        return state, self.reward, self.done, {}
+
+    """
     def get_state(self):
         # snake coordinates abs
         self.snake.x, self.snake.y = self.snake.xcor()/WIDTH, self.snake.ycor()/HEIGHT   
@@ -353,6 +301,7 @@ class Speed(gym.Env):
         # print(state) # state of the current step of the game
 
         return state
+    """
 
     def get_state_speed(self):
         # snake coordinates abs
@@ -431,7 +380,9 @@ class Speed(gym.Env):
         """
 
         # state: apple_up, apple_right, apple_down, apple_left, obstacle_up, obstacle_right, obstacle_down, obstacle_left, direction_up, direction_right, direction_down, direction_left
-        # spe_ed_state: enemy_up, enemy_right, enemy_down, enemy_left, obstacle_up, obstacle_right, obstacle_down, obstacle_left, turn_left, turn_right, slow_down, speed_up, change_nothing
+        # spe_ed_state: enemy_up, enemy_right, enemy_down, enemy_left, obstacle_up, obstacle_right, obstacle_down, obstacle_left, direction_up, direction_right, direction_down, direction_left, turn_left, turn_right, slow_down, speed_up, change_nothing
+        # spe_ed_state: enemy_up, enemy_right, enemy_down, enemy_left, obstacle_up, obstacle_right, obstacle_down, obstacle_left, direction_up, direction_right, direction_down, direction_left (are we needing an action here?)
+        """
         if self.env_info['state_space'] == 'coordinates':
             state = [self.apple.xsc, self.apple.ysc, self.snake.xsc, self.snake.ysc, \
                     int(wall_up or body_up), int(wall_right or body_right), int(wall_down or body_down), int(wall_left or body_left), \
@@ -448,8 +399,13 @@ class Speed(gym.Env):
             state = [int(self.snake.y < self.apple.y), int(self.snake.x < self.apple.x), int(self.snake.y > self.apple.y), int(self.snake.x > self.apple.x), \
                     int(wall_up or body_up), int(wall_right or body_right), int(wall_down or body_down), int(wall_left or body_left), \
                     int(self.snake.direction == 'up'), int(self.snake.direction == 'right'), int(self.snake.direction == 'down'), int(self.snake.direction == 'left')]
-            
+        """ 
         # print(state) # state of the current step of the game
+
+        state = [int(player_y < enemy_y), int(player_x < enemy_x), int(player_y > enemy_y), int(player_x > enemy_x), \
+                int(wall_up), int(wall_right), int(wall_down), int(wall_left), \
+                int(self.player.direction == 'up'), int(self.player.direction == 'right'), int(self.player.direction == 'down'), int(self.player.direction == 'left')]
+
 
         return state
 
