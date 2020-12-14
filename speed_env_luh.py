@@ -81,12 +81,12 @@ class Speed(gym.Env):
         self.total, self.maximum = 0, 0
         self.env_info = env_info
 
-        self.player = self.gamestate.players[int(self.gamestate.you)] # self.GameState.Player()
+        self.player = self.gamestate.players[int(self.gamestate.you) - 1] # self.GameState.Player()
         self.snake_body = [] # snake body, add first element (for location of snake's head)
 
         # TODO: implement here all the enemys
         # distance between first enemy and player
-        self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x,)**2 + (self.player.y - self.gamestate.players[0].y)**2)
+        self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
 
         """
         # distance between apple and snake
@@ -444,15 +444,21 @@ async def connection():
 	print("AFTER game ready: TIME: ", datetime.now(), flush=True)
 	
 
-asyncio.get_event_loop().run_until_complete(connection())
+# asyncio.get_event_loop().run_until_complete(connection())
 
 
-"""
+def main():
+    asyncio.get_event_loop().run_until_complete(connection())
+
+
+
 if __name__ == '__main__':            
+    """
     human = True
     env = Speed(human=human)
 
     if human:
         while True:
             env.run_game()
-"""
+    """
+    main()
