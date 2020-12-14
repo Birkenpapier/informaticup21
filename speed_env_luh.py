@@ -81,41 +81,14 @@ class Speed(gym.Env):
         self.total, self.maximum = 0, 0
         self.env_info = env_info
 
-                
-        # snake
-        # self.snake = turtle.Turtle()
-        # self.snake.shape(SNAKE_SHAPE)
-        # self.snake.speed(0)
-        # self.snake.penup()
-        # self.snake.color(SNAKE_COLOR)
-        # self.snake.goto(SNAKE_START_LOC_H, SNAKE_START_LOC_V)
-        # self.snake.direction = 'stop'
-        # self.snake_body = [] # snake body, add first element (for location of snake's head)
-        # self.add_to_body() # graphical function for adding the eated apple to body
-
-        # self.snake = turtle.Turtle() # self.GameState.Player()
         self.player = self.gamestate.players[int(self.gamestate.you)] # self.GameState.Player()
         self.snake_body = [] # snake body, add first element (for location of snake's head)
-        # self.add_to_body() # graphical function for adding the eated apple to body
 
-        # apple
-        # self.apple = turtle.Turtle()
-        # self.apple.speed(0)
-        # self.apple.shape(APPLE_SHAPE)
-        # self.apple.color(APPLE_COLOR)
-        # self.apple.penup()
-        # sself.move_apple(first=True)
-        
         # TODO: implement here all the enemys
-        # apple
-        """
-        self.apple = turtle.Turtle()
-        self.apple.speed(0)
-        self.apple.shape(APPLE_SHAPE)
-        self.apple.color(APPLE_COLOR)
-        self.apple.penup()
-        self.move_apple(first=True)
+        # distance between first enemy and player
+        self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x,)**2 + (self.player.y - self.gamestate.players[0].y)**2)
 
+        """
         # distance between apple and snake
         self.dist = math.sqrt((self.snake.xcor()-self.apple.xcor())**2 + (self.snake.ycor()-self.apple.ycor())**2)
         """
@@ -127,9 +100,10 @@ class Speed(gym.Env):
 
     def measure_distance(self):
         self.prev_dist = self.dist
-        self.dist = math.sqrt((self.snake.xcor()-self.apple.xcor())**2 + (self.snake.ycor()-self.apple.ycor())**2)
+        # self.dist = math.sqrt((self.snake.xcor()-self.apple.xcor())**2 + (self.snake.ycor()-self.apple.ycor())**2)
+        self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x,)**2 + (self.player.y - self.gamestate.players[0].y)**2)
 
-
+    """
     def body_check_snake(self):
         if len(self.snake_body) > 1:
             for body in self.snake_body[1:]:
@@ -149,7 +123,7 @@ class Speed(gym.Env):
         if self.snake.xcor() > 200 or self.snake.xcor() < -200 or self.snake.ycor() > 200 or self.snake.ycor() < -200:
             # self.reset_score()
             return True
-    
+    """
 
     """
     def reset(self):
@@ -167,10 +141,10 @@ class Speed(gym.Env):
 
         return state
     """
-
+    """
     def run_game(self):
         reward_given = False
-        # self.move_snake()
+        self.move_snake()
         
         if self.move_apple():
             self.reward = 10
@@ -188,6 +162,34 @@ class Speed(gym.Env):
             self.reward = -100
             reward_given = True
             self.done = True
+
+        if not reward_given:
+            if self.dist < self.prev_dist:
+                self.reward = 1
+            else:
+                self.reward = -1
+    """
+    def run_game(self):
+        reward_given = False
+        # self.move_snake()
+        """        
+        if self.move_apple():
+            self.reward = 10
+            reward_given = True
+        
+        # self.move_snakebody()
+        # self.measure_distance()
+        
+        if self.body_check_snake():
+            self.reward = -100
+            reward_given = True
+            self.done = True
+        
+        if self.wall_check():
+            self.reward = -100
+            reward_given = True
+            self.done = True
+        """
 
         if not reward_given:
             if self.dist < self.prev_dist:
@@ -318,7 +320,9 @@ class Speed(gym.Env):
         # apple coordintes scaled 0-1 
         # self.apple.xsc, self.apple.ysc = self.apple.x/WIDTH+0.5, self.apple.y/HEIGHT+0.5
         # spe_ed
-        enemy_x, enemy_y = self.gamestate.players[0].x / self.gamestate.width + 0.5, self.gamestate.players[0].y  / self.gamestate.height + 0.5
+        # not scaled
+        enemy_x, enemy_y = self.gamestate.players[0].x, self.gamestate.players[0].y
+        # enemy_x, enemy_y = self.gamestate.players[0].x / self.gamestate.width + 0.5, self.gamestate.players[0].y  / self.gamestate.height + 0.5
 
         # wall check
         """
