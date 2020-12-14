@@ -30,6 +30,19 @@ class GameState:
 				break
 			id += 1
 		return ret
+
+	def json_to_file(self, input, status, initial_time):
+		if(status == 1):
+			file = open("JSON Logs/" + initial_time + "_ALIVE.txt",'a+')
+			file.write(json.dumps(input))
+		if (status == 0):
+			file = open("JSON Logs/" + initial_time + "_LOST.txt", 'a+')
+			file.write(json.dumps(input))
+		if (status == -1):
+			file = open("JSON Logs/" + initial_time + "_END.txt", 'a+')
+			file.write(json.dumps(input))
+		file.close
+		return None
 		
 	class Player:
 		def __init__(self, id, info):
@@ -52,6 +65,7 @@ async def connection():
 	async with websockets.connect(uri) as ws:
 		
 		start_time = datetime.now()
+		initial_time = start_time.strftime("%m.%d.%Y, %H.%M.%S")
 		print("Waiting for initial state...", flush=True)
 		print("PRIOR game ready: TIME: ", start_time, flush=True)
 		
@@ -77,17 +91,19 @@ async def connection():
 			if not started :
 				started = True
 				client_time = datetime.now()
-			
+
 			state = GameState(json.loads(ans))
-			
 			if not state.running:
 				print("Game ended")
+				state.json_to_file(json.loads(ans), -1, initial_time)
 				break
 			
 			if not state.players[state.you - 1].active:
 				print("You lose")
+				state.json_to_file(json.loads(ans), 0, initial_time)
 				break
-			
+
+			state.json_to_file(json.loads(ans), 1, initial_time)
 			action = "speed_up"
 			action_json = json.dumps({"action": action})
 			await ws.send(action_json)
