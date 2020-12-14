@@ -112,7 +112,7 @@ class DQN:
 
 class GameState():
     def __init__(self, data):
-        print(data) # print the received json
+        # print(data) # print the received json
         self.width = data['width']
         self.height = data['height']
         self.cells = data['cells']
