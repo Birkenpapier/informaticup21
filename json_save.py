@@ -11,5 +11,5 @@ import sys
 x = int(sys.argv[1])
 
 for i in range(x):
-    os.system('start /wait cmd /c "python connection.py"')
+    os.system('start /wait cmd /c "python speed_env_luh.py"')
     time.sleep(1)

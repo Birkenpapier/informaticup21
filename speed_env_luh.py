@@ -40,6 +40,8 @@ SNAKE_START_LOC_V = 0
 APPLE_SHAPE = 'circle'
 APPLE_COLOR = 'green'
 
+COUNTER = 0
+
 ###
 class DQN:
 
@@ -136,6 +138,20 @@ class GameState():
             id += 1
         return ret
 
+    def json_to_file(self, input, status, initial_time):
+        if (status == 0):
+            file = open("JSON Logs/" + initial_time + "_RUNNING.txt", 'a+')
+            file.write("JSON STATE: ")
+            file.write(json.dumps(input))
+            file.write("\n")
+            global COUNTER
+            file.write("COUNTER: " + str(COUNTER))
+            file.write("\n")
+            COUNTER = COUNTER + 1
+        file.close
+
+        return None
+
 
 class Player():
     def __init__(self, id, info):
@@ -170,7 +186,7 @@ class Speed(gym.Env):
         self.player = self.gamestate.players[int(self.gamestate.you) - 1] # self.GameState.Player()
         self.snake_body = [] # snake body, add first element (for location of snake's head)
 
-        # TODO: implement here all the enemys
+        # TODO: implement here all the enemies
         # distance between first enemy and player
         self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
 
@@ -532,14 +548,14 @@ def train_dqn(episode, env):
     return sum_of_rewards
 
 
-
 async def connection():
 
     async with websockets.connect(URI) as ws:
 
         print("Waiting for initial state...", flush=True)
         print("PRIOR game ready: TIME: ", datetime.now(), flush=True)
-        
+        start_time = datetime.now()
+        initial_time = start_time.strftime("%m.%d.%Y, %H.%M.%S")
         started = False
 
         while True:
@@ -549,8 +565,12 @@ async def connection():
             
             # state = Speed.GameState(json.loads(ans))
             state = Speed(json.loads(ans))
+            stateString = GameState(json.loads(ans))
+            stateString.json_to_file(json.loads(ans), 0, initial_time)
+
             # print(state.gamestate.players)
             if not state.gamestate.running:
+                stateString.json_to_file(json.loads(ans), 0, initial_time)
                 break
             
             # injection of DQN agent
@@ -583,7 +603,6 @@ async def connection():
             action = agent.act(game_state)
             # print(action) # outcomment this for better visibility
             prev_state = game_state
-            
             # inject here the next state based on send action
             """
             action_to_send = action
@@ -611,11 +630,14 @@ async def connection():
 
 
             results[params['name']] = sum_of_rewards
-            # end of injection 
-
-            
+            # end of injection
             action = action_from_ai
             action_json = json.dumps({"action": action})
+            file = open("JSON Logs/" + initial_time + "_RUNNING.txt", 'a+')
+            file.write("Gewählte Aktion: ")
+            file.write(action_json)
+            file.write("\n")
+            file.close
             await ws.send(action_json)
             print("Action sent: ", action)
             
