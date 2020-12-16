@@ -9,6 +9,7 @@ import time
 import math
 import gym
 import json
+import os
 
 
 ###
@@ -140,6 +141,8 @@ class GameState():
 
     def json_to_file(self, input, status, initial_time):
         if (status == 0):
+            if not os.path.exists("JSON Logs/"):
+                os.makedirs("JSON Logs/")
             file = open("JSON Logs/" + initial_time + "_RUNNING.txt", 'a+')
             file.write("JSON STATE: ")
             file.write(json.dumps(input))
