@@ -552,6 +552,25 @@ def train_dqn(episode, env):
 
 
 async def connection():
+    # injection of DQN agent
+    params = dict()
+    params['name'] = None
+    params['epsilon'] = 1
+    params['gamma'] = .95
+    params['batch_size'] = 500
+    params['epsilon_min'] = .01
+    params['epsilon_decay'] = .995
+    params['learning_rate'] = 0.00025
+    params['layer_sizes'] = [128, 128, 128]
+
+    results = dict()
+    ep = 50 # 50      
+    
+    
+    # sum_of_rewards = train_dqn(ep, state)
+    # outsource following code block back to train_dqn because we don't have currently episodes
+    sum_of_rewards = []
+
 
     async with websockets.connect(URI) as ws:
 
@@ -576,6 +595,7 @@ async def connection():
                 stateString.json_to_file(json.loads(ans), 0, initial_time)
                 break
             
+            """
             # injection of DQN agent
             params = dict()
             params['name'] = None
@@ -594,6 +614,7 @@ async def connection():
             # sum_of_rewards = train_dqn(ep, state)
             # outsource following code block back to train_dqn because we don't have currently episodes
             sum_of_rewards = []
+            """
             agent = DQN(state, params)
 
             # for e in range(episode):
@@ -602,6 +623,9 @@ async def connection():
             game_state = np.reshape(game_state, (1, state.state_space))
             score = 0
             max_steps = 10000
+
+            print(f"game_state: {game_state}")
+
             # for i in range(max_steps):
             action = agent.act(game_state)
             # print(action) # outcomment this for better visibility
