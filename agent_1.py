@@ -94,7 +94,9 @@ def train_dqn(episode, env):
             action = agent.act(state)
             # print(action) # outcomment this for better visibility
             prev_state = state
+            # print(f"prev_state: {prev_state}")
             next_state, reward, done, _ = env.step(action)
+            # print(f"next_state: {next_state}")
             score += reward
             next_state = np.reshape(next_state, (1, env.state_space))
             agent.remember(state, action, reward, next_state, done)

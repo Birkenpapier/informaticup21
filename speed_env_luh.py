@@ -517,6 +517,7 @@ class Speed(gym.Env):
                 int(wall_up), int(wall_right), int(wall_down), int(wall_left), \
                 int(self.player.direction == 'up'), int(self.player.direction == 'right'), int(self.player.direction == 'down'), int(self.player.direction == 'left')]
 
+        print(f"der state aus der get_state funktion: {state}")
 
         return state
 
@@ -566,7 +567,13 @@ async def connection():
     results = dict()
     ep = 50 # 50      
     
-    
+    """
+    game_state = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    game_state = np.reshape(game_state, (1, state.state_space))
+    score = 0
+    max_steps = 10000
+    """
+
     # sum_of_rewards = train_dqn(ep, state)
     # outsource following code block back to train_dqn because we don't have currently episodes
     sum_of_rewards = []
@@ -587,6 +594,7 @@ async def connection():
             
             # state = Speed.GameState(json.loads(ans))
             state = Speed(json.loads(ans))
+            
             stateString = GameState(json.loads(ans))
             stateString.json_to_file(json.loads(ans), 0, initial_time)
 
@@ -595,6 +603,12 @@ async def connection():
                 stateString.json_to_file(json.loads(ans), 0, initial_time)
                 break
             
+            game_state = state.get_state_speed()
+            game_state = np.reshape(game_state, (1, state.state_space))
+            score = 0
+            max_steps = 10000
+
+
             """
             # injection of DQN agent
             params = dict()
@@ -619,10 +633,11 @@ async def connection():
 
             # for e in range(episode):
             # state = env.reset()
-            game_state = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-            game_state = np.reshape(game_state, (1, state.state_space))
-            score = 0
-            max_steps = 10000
+            
+            # game_state = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            # game_state = np.reshape(game_state, (1, state.state_space))
+            # score = 0
+            # max_steps = 10000
 
             print(f"game_state: {game_state}")
 
