@@ -704,7 +704,6 @@ def main():
     for e in range(ep):
         asyncio.get_event_loop().run_until_complete(connection())
 
-    print("kommen wir hier hin, obwohl das game noch nicht weiter gegangen ist?") # edit: nein, kommen wir nicht
 
 if __name__ == '__main__':            
     main()
