@@ -206,7 +206,20 @@ class Speed(gym.Env):
     def measure_distance(self):
         self.prev_dist = self.dist
         # self.dist = math.sqrt((self.snake.xcor()-self.apple.xcor())**2 + (self.snake.ycor()-self.apple.ycor())**2)
-        self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
+        self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2) # TODO: check this calculation
+
+
+    def wall_check(self):
+        if self.player.x > 200 or self.player.x < -200 or self.player.y > 200 or self.player.y < -200:
+            return True
+
+    """
+    def body_check_snake(self):
+        for body in self.snake_body[1:]:
+            if body.distance(self.snake) < 20:
+                # self.reset_score()
+                return True     
+    """
 
     """
     def body_check_snake(self):
@@ -289,16 +302,17 @@ class Speed(gym.Env):
             self.reward = -100
             reward_given = True
             self.done = True
-        
+        """
         if self.wall_check():
             self.reward = -100
             reward_given = True
             self.done = True
-        """
+        """output"""
         
         self.measure_distance()
 
         if not reward_given:
+            print(f"reward funktion results: {self.dist}, {self.prev_dist}, {self.dist < self.prev_dist}")
             if self.dist < self.prev_dist:
                 self.reward = 1
             else:
@@ -552,7 +566,7 @@ def train_dqn(episode, env):
     return sum_of_rewards
 
 
-async def connection():
+async def connection(sum_of_rewards):
     # injection of DQN agent
     params = dict()
     params['name'] = None
@@ -565,7 +579,6 @@ async def connection():
     params['layer_sizes'] = [128, 128, 128]
 
     results = dict()
-    ep = 50 # 50      
     
     """
     game_state = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -576,7 +589,8 @@ async def connection():
 
     # sum_of_rewards = train_dqn(ep, state)
     # outsource following code block back to train_dqn because we don't have currently episodes
-    sum_of_rewards = []
+    
+    # sum_of_rewards = []
 
 
     async with websockets.connect(URI) as ws:
@@ -606,7 +620,6 @@ async def connection():
             game_state = state.get_state_speed()
             game_state = np.reshape(game_state, (1, state.state_space))
             score = 0
-            max_steps = 10000
 
 
             """
@@ -639,6 +652,8 @@ async def connection():
             # score = 0
             # max_steps = 10000
 
+            # TODO: investigate why there are some games where the state does not change
+            # our fault or GI's fault? !!!!!!!!!!!!!!
             print(f"game_state: {game_state}")
 
             # for i in range(max_steps):
@@ -654,7 +669,8 @@ async def connection():
             """
 
             # next_state, reward, done, _ = state.step(action)
-            next_state, reward, done, action_from_ai = state.step(action)
+            next_state, reward, done, action_from_ai = state.step(action) # fix wrong next state bug
+            print(f"next_state: {next_state}")
 
             score += reward
             next_state = np.reshape(next_state, (1, state.state_space))
@@ -662,10 +678,12 @@ async def connection():
             game_state = next_state
             if params['batch_size'] > 1:
                 agent.replay()
+            """
             if done:
                 print(f'final state before dying: {str(prev_state)}')
                 # print(f'episode: {e+1}/{episode}, score: {score}')
                 break
+            """
 
             sum_of_rewards.append(score)
             # return sum_of_rewards
@@ -694,16 +712,14 @@ async def connection():
     print("AFTER game ready: TIME: ", datetime.now(), flush=True)
 
 
-# asyncio.get_event_loop().run_until_complete(connection())
-
-
 def main():
-    # env = Speed()
-    ep = 50
+    ep = 2 # 50
+    sum_of_rewards = []
 
     for e in range(ep):
-        asyncio.get_event_loop().run_until_complete(connection())
+        asyncio.get_event_loop().run_until_complete(connection(sum_of_rewards))
 
+    print(f"das ist die sum_of_rewards: {sum_of_rewards}")
 
 if __name__ == '__main__':            
     main()
