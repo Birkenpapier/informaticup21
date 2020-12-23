@@ -193,10 +193,6 @@ class Speed(gym.Env):
         # distance between first enemy and player
         self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
 
-        """
-        # distance between apple and snake
-        self.dist = math.sqrt((self.snake.xcor()-self.apple.xcor())**2 + (self.snake.ycor()-self.apple.ycor())**2)
-        """
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -213,80 +209,6 @@ class Speed(gym.Env):
         if self.player.x > 200 or self.player.x < -200 or self.player.y > 200 or self.player.y < -200:
             return True
 
-    """
-    def body_check_snake(self):
-        for body in self.snake_body[1:]:
-            if body.distance(self.snake) < 20:
-                # self.reset_score()
-                return True     
-    """
-
-    """
-    def body_check_snake(self):
-        if len(self.snake_body) > 1:
-            for body in self.snake_body[1:]:
-                if body.distance(self.snake) < 20:
-                    # self.reset_score()
-                    return True     
-
-
-    def body_check_apple(self):
-        if len(self.snake_body) > 0:
-            for body in self.snake_body[:]:
-                if body.distance(self.apple) < 20:
-                    return True
-
-
-    def wall_check(self):
-        if self.snake.xcor() > 200 or self.snake.xcor() < -200 or self.snake.ycor() > 200 or self.snake.ycor() < -200:
-            # self.reset_score()
-            return True
-    """
-
-    """
-    def reset(self):
-        for body in self.snake_body:
-            body.goto(1000, 1000)
-
-        self.snake_body = []
-        self.snake.goto(SNAKE_START_LOC_H, SNAKE_START_LOC_V)
-        self.snake.direction = 'stop'
-        self.reward = 0
-        self.total = 0
-        self.done = False
-
-        state = self.get_state()
-
-        return state
-    """
-    """
-    def run_game(self):
-        reward_given = False
-        self.move_snake()
-        
-        if self.move_apple():
-            self.reward = 10
-            reward_given = True
-        
-        self.move_snakebody()
-        self.measure_distance()
-        
-        if self.body_check_snake():
-            self.reward = -100
-            reward_given = True
-            self.done = True
-        
-        if self.wall_check():
-            self.reward = -100
-            reward_given = True
-            self.done = True
-
-        if not reward_given:
-            if self.dist < self.prev_dist:
-                self.reward = 1
-            else:
-                self.reward = -1
-    """
     def run_game(self):
         reward_given = False
         # self.move_snake()
@@ -303,10 +225,12 @@ class Speed(gym.Env):
             reward_given = True
             self.done = True
         """
+        """
         if self.wall_check():
             self.reward = -100
             reward_given = True
             self.done = True
+        """
         """output"""
         
         self.measure_distance()
@@ -318,22 +242,7 @@ class Speed(gym.Env):
             else:
                 self.reward = -1
 
-    """
-    # AI agent
-    def step(self, action):
-        if action == 0:
-            self.go_up()
-        if action == 1:
-            self.go_right()
-        if action == 2:
-            self.go_down()
-        if action == 3:
-            self.go_left()
-        self.run_game()
-        state = self.get_state()
-        return state, self.reward, self.done, {}
-    """
-    
+
     # AI agent
     def step(self, action):
         if action == 0:
@@ -353,78 +262,6 @@ class Speed(gym.Env):
 
         return state, self.reward, self.done, self.returned_action # {}
 
-    """
-    def get_state(self):
-        # snake coordinates abs
-        self.snake.x, self.snake.y = self.snake.xcor()/WIDTH, self.snake.ycor()/HEIGHT   
-        # snake coordinates scaled 0-1
-        self.snake.xsc, self.snake.ysc = self.snake.x/WIDTH+0.5, self.snake.y/HEIGHT+0.5
-        # apple coordintes scaled 0-1 
-        self.apple.xsc, self.apple.ysc = self.apple.x/WIDTH+0.5, self.apple.y/HEIGHT+0.5
-
-        # wall check
-        if self.snake.y >= HEIGHT/2:
-            wall_up, wall_down = 1, 0
-        elif self.snake.y <= -HEIGHT/2:
-            wall_up, wall_down = 0, 1
-        else:
-            wall_up, wall_down = 0, 0
-        if self.snake.x >= WIDTH/2:
-            wall_right, wall_left = 1, 0
-        elif self.snake.x <= -WIDTH/2:
-            wall_right, wall_left = 0, 1
-        else:
-            wall_right, wall_left = 0, 0
-
-        # body close
-        body_up = []
-        body_right = []
-        body_down = []
-        body_left = []
-        if len(self.snake_body) > 3:
-            for body in self.snake_body[3:]:
-                if body.distance(self.snake) == 20:
-                    if body.ycor() < self.snake.ycor():
-                        body_down.append(1)
-                    elif body.ycor() > self.snake.ycor():
-                        body_up.append(1)
-                    if body.xcor() < self.snake.xcor():
-                        body_left.append(1)
-                    elif body.xcor() > self.snake.xcor():
-                        body_right.append(1)
-        
-        if len(body_up) > 0: body_up = 1
-        else: body_up = 0
-        if len(body_right) > 0: body_right = 1
-        else: body_right = 0
-        if len(body_down) > 0: body_down = 1
-        else: body_down = 0
-        if len(body_left) > 0: body_left = 1
-        else: body_left = 0
-
-        # state: apple_up, apple_right, apple_down, apple_left, obstacle_up, obstacle_right, obstacle_down, obstacle_left, direction_up, direction_right, direction_down, direction_left
-        # spe_ed_state: enemy_up, enemy_right, enemy_down, enemy_left, obstacle_up, obstacle_right, obstacle_down, obstacle_left, turn_left, turn_right, slow_down, speed_up, change_nothing
-        if self.env_info['state_space'] == 'coordinates':
-            state = [self.apple.xsc, self.apple.ysc, self.snake.xsc, self.snake.ysc, \
-                    int(wall_up or body_up), int(wall_right or body_right), int(wall_down or body_down), int(wall_left or body_left), \
-                    int(self.snake.direction == 'up'), int(self.snake.direction == 'right'), int(self.snake.direction == 'down'), int(self.snake.direction == 'left')]
-        elif self.env_info['state_space'] == 'no direction':
-            state = [int(self.snake.y < self.apple.y), int(self.snake.x < self.apple.x), int(self.snake.y > self.apple.y), int(self.snake.x > self.apple.x), \
-                    int(wall_up or body_up), int(wall_right or body_right), int(wall_down or body_down), int(wall_left or body_left), \
-                    0, 0, 0, 0]
-        elif self.env_info['state_space'] == 'no body knowledge':
-            state = [int(self.snake.y < self.apple.y), int(self.snake.x < self.apple.x), int(self.snake.y > self.apple.y), int(self.snake.x > self.apple.x), \
-                    wall_up, wall_right, wall_down, wall_left, \
-                    int(self.snake.direction == 'up'), int(self.snake.direction == 'right'), int(self.snake.direction == 'down'), int(self.snake.direction == 'left')]
-        else:
-            state = [int(self.snake.y < self.apple.y), int(self.snake.x < self.apple.x), int(self.snake.y > self.apple.y), int(self.snake.x > self.apple.x), \
-                    int(wall_up or body_up), int(wall_right or body_right), int(wall_down or body_down), int(wall_left or body_left), \
-                    int(self.snake.direction == 'up'), int(self.snake.direction == 'right'), int(self.snake.direction == 'down'), int(self.snake.direction == 'left')]
-            
-        # print(state) # state of the current step of the game
-
-        return state
-    """
 
     def get_state_speed(self):
         # snake coordinates abs
@@ -580,19 +417,6 @@ async def connection(sum_of_rewards):
 
     results = dict()
     
-    """
-    game_state = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    game_state = np.reshape(game_state, (1, state.state_space))
-    score = 0
-    max_steps = 10000
-    """
-
-    # sum_of_rewards = train_dqn(ep, state)
-    # outsource following code block back to train_dqn because we don't have currently episodes
-    
-    # sum_of_rewards = []
-
-
     async with websockets.connect(URI) as ws:
 
         print("Waiting for initial state...", flush=True)
@@ -621,52 +445,16 @@ async def connection(sum_of_rewards):
             game_state = np.reshape(game_state, (1, state.state_space))
             score = 0
 
-
-            """
-            # injection of DQN agent
-            params = dict()
-            params['name'] = None
-            params['epsilon'] = 1
-            params['gamma'] = .95
-            params['batch_size'] = 500
-            params['epsilon_min'] = .01
-            params['epsilon_decay'] = .995
-            params['learning_rate'] = 0.00025
-            params['layer_sizes'] = [128, 128, 128]
-
-            results = dict()
-            ep = 50 # 50      
-            
-            
-            # sum_of_rewards = train_dqn(ep, state)
-            # outsource following code block back to train_dqn because we don't have currently episodes
-            sum_of_rewards = []
-            """
             agent = DQN(state, params)
-
-            # for e in range(episode):
-            # state = env.reset()
-            
-            # game_state = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-            # game_state = np.reshape(game_state, (1, state.state_space))
-            # score = 0
-            # max_steps = 10000
 
             # TODO: investigate why there are some games where the state does not change
             # our fault or GI's fault? !!!!!!!!!!!!!!
             print(f"game_state: {game_state}")
 
-            # for i in range(max_steps):
             action = agent.act(game_state)
             # print(action) # outcomment this for better visibility
             prev_state = game_state
             # inject here the next state based on send action
-            """
-            action_to_send = action
-            action_json = json.dumps({"action": action_to_send})
-            await ws.send(action_json)
-            print("Action sent: ", action_to_send)
-            """
 
             # next_state, reward, done, _ = state.step(action)
             next_state, reward, done, action_from_ai = state.step(action) # fix wrong next state bug
@@ -678,19 +466,12 @@ async def connection(sum_of_rewards):
             game_state = next_state
             if params['batch_size'] > 1:
                 agent.replay()
-            """
-            if done:
-                print(f'final state before dying: {str(prev_state)}')
-                # print(f'episode: {e+1}/{episode}, score: {score}')
-                break
-            """
 
             sum_of_rewards.append(score)
-            # return sum_of_rewards
-
 
             results[params['name']] = sum_of_rewards
             # end of injection
+
             action = action_from_ai
             action_json = json.dumps({"action": action})
             file = open("JSON Logs/" + initial_time + "_RUNNING.txt", 'a+')
