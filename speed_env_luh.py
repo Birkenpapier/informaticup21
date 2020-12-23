@@ -33,14 +33,6 @@ URI = "wss://msoll.de/spe_ed?key=LSIS7VOFLXCISR3K4YUSZ3CN2Z3CF74PEB7EKE4AQ7PDVKA
 HEIGHT = 20      # number of steps vertically from wall to wall of screen
 WIDTH = 20       # number of steps horizontally from wall to wall of screen
 
-SNAKE_SHAPE = 'square'
-SNAKE_COLOR = 'black'
-SNAKE_START_LOC_H = 0
-SNAKE_START_LOC_V = 0
-
-APPLE_SHAPE = 'circle'
-APPLE_COLOR = 'green'
-
 COUNTER = 0
 
 ###
