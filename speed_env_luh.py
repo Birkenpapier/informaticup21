@@ -700,14 +700,6 @@ async def connection(sum_of_rewards):
             file.close
             await ws.send(action_json)
             print("Action sent: ", action)
-            
-            """
-            action = "speed_up"
-            action_json = json.dumps({"action": action})
-            await ws.send(action_json)
-            print("Action sent: ", action)
-            """
-            
 
     print("AFTER game ready: TIME: ", datetime.now(), flush=True)
 
