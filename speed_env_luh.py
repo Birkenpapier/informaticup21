@@ -112,7 +112,7 @@ class GameState():
         self.height = data['height']
         self.cells = data['cells']
         self.pl = data['players']
-        self.players = self.get_players(data['players'])
+        self.players = self.get_players(data['players'], data['cells'])
         self.you = data['you']
         self.running = data['running']
         try:
@@ -120,12 +120,15 @@ class GameState():
         except KeyError:
             self.deadline = ''
         
-    def get_players(self, player_list):
+    def get_players(self, player_list, cells):
+        #Get body coordinates for each player
+        bodyCoords = getPlayersBodyLocations(cells)
+
         ret = []
         id = 1
         while True:
             try:
-                ret.append(Player(id, player_list[str(id)]))
+                ret.append(Player(id, player_list[str(id)], bodyCoords))
             except KeyError:
                 break
             id += 1
@@ -147,16 +150,44 @@ class GameState():
 
         return None
 
+#Method to get the bodylocations for each player
+def getPlayersBodyLocations(cells):
+
+    #Get and save the location of all playerbodys
+    allPlayerBodyCords = []
+
+    playerNr = 1
+    #Check for each player the location and save as a list (0-58 rows, 0-76 columns in this example)
+    while playerNr < 7:
+        playerBodyCords = []
+
+        rowNr = -1
+        for cellRow in cells:
+            rowNr = rowNr + 1
+            columNr = 0
+            for cell in cellRow:
+                if(cell == playerNr):
+                    playerBodyCords.append((columNr, rowNr))
+                columNr = columNr + 1
+
+
+        allPlayerBodyCords.append(playerBodyCords)
+        playerNr = playerNr + 1
+
+
+    return allPlayerBodyCords # Tuplelist with player locations
 
 class Player():
-    def __init__(self, id, info):
+    def __init__(self, id, info, bodyCoords):
         self.id = id
         self.x = info['x']
         self.y = info['y']
         self.direction = info['direction']
         self.speed = info['speed']
         self.active = info['active']
+        self.bodyCoords = bodyCoords[id-1]
         # self.name = info['name'] # nicht notwendig
+        print(bodyCoords)
 
     def display(self):
         print(self.id, ': ', self.x, self.y, self.direction, self.speed, self.active)
