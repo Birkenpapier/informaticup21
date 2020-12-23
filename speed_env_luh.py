@@ -150,32 +150,32 @@ class GameState():
 
         return None
 
-#Method to get the bodylocations for each player
-def getPlayersBodyLocations(cells):
+    #Method to get the bodylocations for each player
+    def getPlayersBodyLocations(cells):
 
-    #Get and save the location of all playerbodys
-    allPlayerBodyCords = []
+        #Get and save the location of all playerbodys
+        allPlayerBodyCords = []
 
-    playerNr = 1
-    #Check for each player the location and save as a list (0-58 rows, 0-76 columns in this example)
-    while playerNr < 7:
-        playerBodyCords = []
+        playerNr = 1
+        #Check for each player the location and save as a list (0-58 rows, 0-76 columns in this example)
+        while playerNr < 7:
+            playerBodyCords = []
 
-        rowNr = -1
-        for cellRow in cells:
-            rowNr = rowNr + 1
-            columNr = 0
-            for cell in cellRow:
-                if(cell == playerNr):
-                    playerBodyCords.append((columNr, rowNr))
-                columNr = columNr + 1
-
-
-        allPlayerBodyCords.append(playerBodyCords)
-        playerNr = playerNr + 1
+            rowNr = -1
+            for cellRow in cells:
+                rowNr = rowNr + 1
+                columNr = 0
+                for cell in cellRow:
+                    if(cell == playerNr):
+                        playerBodyCords.append((columNr, rowNr))
+                    columNr = columNr + 1
 
 
-    return allPlayerBodyCords # Tuplelist with player locations
+            allPlayerBodyCords.append(playerBodyCords)
+            playerNr = playerNr + 1
+
+
+        return allPlayerBodyCords # Tuplelist with player locations
 
 class Player():
     def __init__(self, id, info, bodyCoords):
