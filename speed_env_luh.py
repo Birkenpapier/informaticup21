@@ -194,7 +194,10 @@ class Speed(gym.Env):
     def measure_distance(self):
         self.prev_dist = self.dist
         # self.dist = math.sqrt((self.snake.xcor()-self.apple.xcor())**2 + (self.snake.ycor()-self.apple.ycor())**2)
-        self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2) # TODO: check this calculation
+        if self.gamestate.players[0].id != self.player.id:
+            self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
+        else:
+            self.dist = math.sqrt((self.player.x - self.gamestate.players[1].x)**2 + (self.player.y - self.gamestate.players[1].y)**2)
 
 
     def wall_check(self):
