@@ -150,8 +150,8 @@ class GameState():
 
         return None
 
-    #Method to get the bodylocations for each player
-    def getPlayersBodyLocations(cells):
+    #Method to get the bodylocations for each playe
+    def getPlayersBodyLocations(self, cells):
 
         #Get and save the location of all playerbodys
         allPlayerBodyCords = []
