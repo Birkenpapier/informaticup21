@@ -421,8 +421,7 @@ async def connection(sum_of_rewards):
         started = False
 
         while True:
-            if not started:
-                ans = await ws.recv()
+            ans = await ws.recv()
             
             if not started : started = True
             
@@ -452,26 +451,9 @@ async def connection(sum_of_rewards):
             prev_state = game_state
             # inject here the next state based on send action
 
-
-            # experiment: needs next state for learning of agent
-            action_json = json.dumps({"action": action})
-            await ws.send(action_json)
-            ans = await ws.recv()
-
-            print("kommen wir nach dem senden, noch weiter?")
-
             # next_state, reward, done, _ = state.step(action)
             next_state, reward, done, action_from_ai = state.step(action) # fix wrong next state bug
-            # print(f"next_state: {next_state}")
-
-            
-            state = Speed(json.loads(ans))
-            game_state = state.get_state_speed()
-            game_state = np.reshape(game_state, (1, state.state_space))
-
-
-            print(f"next_state ist eigentlich der previous state aus der fkt: {next_state} und hier der richtige next state: {game_state}")
-
+            print(f"next_state: {next_state}")
 
             score += reward
             next_state = np.reshape(next_state, (1, state.state_space))
@@ -486,21 +468,13 @@ async def connection(sum_of_rewards):
             # end of injection
 
             action = action_from_ai
-            
-
-            # action_json = json.dumps({"action": action})
-
-
+            action_json = json.dumps({"action": action})
             file = open("JSON Logs/" + initial_time + "_RUNNING.txt", 'a+')
             file.write("Gewählte Aktion: ")
             file.write(action_json)
             file.write("\n")
             file.close
-            
-            
-            # await ws.send(action_json)
-
-
+            await ws.send(action_json)
             print("Action sent: ", action)
 
     print("AFTER game ready: TIME: ", datetime.now(), flush=True)
