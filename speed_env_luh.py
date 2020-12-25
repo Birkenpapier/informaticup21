@@ -18,6 +18,7 @@ import os
 import random
 import numpy as np
 from keras import Sequential
+import keras
 from collections import deque
 from keras.layers import Dense
 import matplotlib.pyplot as plt
@@ -52,7 +53,14 @@ class DQN:
         self.learning_rate = params['learning_rate']
         self.layer_sizes = params['layer_sizes']
         self.memory = deque(maxlen=2500)
-        self.model = self.build_model()
+        # self.model = self.build_model()
+
+        if os.path.isfile('models/saved_model.pb'):
+            # print("model exist") # he's loading it every time?
+            self.model = keras.models.load_model('models/')
+        else:
+            # print ("File not exist")
+            self.model = self.build_model()
 
 
     def build_model(self):
