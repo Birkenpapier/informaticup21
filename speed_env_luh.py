@@ -551,6 +551,9 @@ async def connection(sum_of_rewards):
     print("AFTER game ready: TIME: ", datetime.now(), flush=True)
 
 
+    agent.model.save('models/')
+
+
 def main():
     ep = 2 # 50
     sum_of_rewards = []
