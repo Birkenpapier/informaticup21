@@ -210,7 +210,7 @@ class Speed():
         else:
             self.dist = math.sqrt((self.player.x - self.gamestate.players[1].x)**2 + (self.player.y - self.gamestate.players[1].y)**2)
 
-
+    # TODO: check why the results are the same
     def measure_distance(self):
         self.prev_dist = self.dist
         # self.dist = math.sqrt((self.snake.xcor()-self.apple.xcor())**2 + (self.snake.ycor()-self.apple.ycor())**2)
@@ -491,4 +491,3 @@ def main():
 
 if __name__ == '__main__':            
     main()
-    
