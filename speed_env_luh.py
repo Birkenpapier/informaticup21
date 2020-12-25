@@ -148,7 +148,7 @@ class GameState():
         return allPlayerBodyCords # Tuplelist with player locations
     
     def get_players(self, player_list, cells):
-        #Get body coordinates for each player
+        # Get body coordinates for each player
         bodyCoords = self.getPlayersBodyLocations(cells)
 
         ret = []
@@ -188,7 +188,7 @@ class Player():
         self.active = info['active']
         self.bodyCoords = bodyCoords[id-1]
         # self.name = info['name'] # nicht notwendig
-        print(bodyCoords)
+        # print(bodyCoords)
 
     def display(self):
         print(self.id, ': ', self.x, self.y, self.direction, self.speed, self.active)
@@ -501,7 +501,8 @@ async def connection(sum_of_rewards):
                 ans = None
                 print('Reconnecting')
                 # ws = await websockets.connect(URI)
-                break # needed? -> yes
+                time.sleep(2.0) # workaround for too quickly reconnecting
+                break # needed? -> yes, sometimes it is too early and then we get a 429 :-(, maybe time.sleep(2.0)?
                 print(f"the problem: {e}")
 
             print("kommen wir nach dem senden, noch weiter?")
