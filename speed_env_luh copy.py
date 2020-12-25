@@ -18,6 +18,7 @@ import os
 import random
 import numpy as np
 from keras import Sequential
+import keras
 from collections import deque
 from keras.layers import Dense
 import matplotlib.pyplot as plt
@@ -52,7 +53,14 @@ class DQN:
         self.learning_rate = params['learning_rate']
         self.layer_sizes = params['layer_sizes']
         self.memory = deque(maxlen=2500)
-        self.model = self.build_model()
+        # self.model = self.build_model()
+
+        if os.path.isfile('models/saved_model.pb'):
+            # print("model exist") # he's loading it every time?
+            self.model = keras.models.load_model('models/')
+        else:
+            # print ("File not exist")
+            self.model = self.build_model()
 
 
     def build_model(self):
@@ -69,6 +77,9 @@ class DQN:
 
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
+        # print(f"================================================================================================================================================")
+        # print(f"der memory vom DQN: {self.memory}")
+        # print(f"================================================================================================================================================")
 
 
     def act(self, state):
@@ -112,20 +123,50 @@ class GameState():
         self.height = data['height']
         self.cells = data['cells']
         self.pl = data['players']
-        self.players = self.get_players(data['players'])
+        self.players = self.get_players(data['players'], data['cells'])
         self.you = data['you']
         self.running = data['running']
         try:
             self.deadline = data['deadline']
         except KeyError:
             self.deadline = ''
-        
-    def get_players(self, player_list):
+
+    # Method to get the bodylocations for each playe
+    def getPlayersBodyLocations(self, cells):
+
+        #Get and save the location of all playerbodys
+        allPlayerBodyCords = []
+
+        playerNr = 1
+        #Check for each player the location and save as a list (0-58 rows, 0-76 columns in this example)
+        while playerNr < 7:
+            playerBodyCords = []
+
+            rowNr = -1
+            for cellRow in cells:
+                rowNr = rowNr + 1
+                columNr = 0
+                for cell in cellRow:
+                    if(cell == playerNr):
+                        playerBodyCords.append((columNr, rowNr))
+                    columNr = columNr + 1
+
+
+            allPlayerBodyCords.append(playerBodyCords)
+            playerNr = playerNr + 1
+
+
+        return allPlayerBodyCords # Tuplelist with player locations
+    
+    def get_players(self, player_list, cells):
+        # Get body coordinates for each player
+        bodyCoords = self.getPlayersBodyLocations(cells)
+
         ret = []
         id = 1
         while True:
             try:
-                ret.append(Player(id, player_list[str(id)]))
+                ret.append(Player(id, player_list[str(id)], bodyCoords))
             except KeyError:
                 break
             id += 1
@@ -149,14 +190,16 @@ class GameState():
 
 
 class Player():
-    def __init__(self, id, info):
+    def __init__(self, id, info, bodyCoords):
         self.id = id
         self.x = info['x']
         self.y = info['y']
         self.direction = info['direction']
         self.speed = info['speed']
         self.active = info['active']
+        self.bodyCoords = bodyCoords[id-1]
         # self.name = info['name'] # nicht notwendig
+        # print(bodyCoords)
 
     def display(self):
         print(self.id, ': ', self.x, self.y, self.direction, self.speed, self.active)
@@ -183,7 +226,11 @@ class Speed(gym.Env):
 
         # TODO: implement here all the enemies
         # distance between first enemy and player
-        self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
+        # self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
+        if self.gamestate.players[0].id != self.player.id:
+            self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
+        else:
+            self.dist = math.sqrt((self.player.x - self.gamestate.players[1].x)**2 + (self.player.y - self.gamestate.players[1].y)**2)
 
 
     def seed(self, seed=None):
@@ -363,7 +410,7 @@ class Speed(gym.Env):
                 int(wall_up), int(wall_right), int(wall_down), int(wall_left), \
                 int(self.player.direction == 'up'), int(self.player.direction == 'right'), int(self.player.direction == 'down'), int(self.player.direction == 'left')]
 
-        print(f"der state aus der get_state funktion: {state}")
+        # print(f"der state aus der get_state funktion: {state}")
 
         return state
 
@@ -426,99 +473,93 @@ async def connection(sum_of_rewards):
             
             if not started : started = True
             
-            if ans is not None:
-                # state = Speed.GameState(json.loads(ans))
-                state = Speed(json.loads(ans))
-                
-                stateString = GameState(json.loads(ans))
+            # if ans is not None:
+            state = Speed(json.loads(ans))
+            
+            stateString = GameState(json.loads(ans))
+            stateString.json_to_file(json.loads(ans), 0, initial_time)
+
+            # print(state.gamestate.players)
+            if not state.gamestate.running:
                 stateString.json_to_file(json.loads(ans), 0, initial_time)
+                break
+            
+            game_state = state.get_state_speed()
+            game_state = np.reshape(game_state, (1, state.state_space))
+            score = 0
 
-                # print(state.gamestate.players)
-                if not state.gamestate.running:
-                    stateString.json_to_file(json.loads(ans), 0, initial_time)
-                    break
-                
-                game_state = state.get_state_speed()
-                game_state = np.reshape(game_state, (1, state.state_space))
-                score = 0
+            agent = DQN(state, params)
 
-                agent = DQN(state, params)
+            print(f"game_state: {game_state}")
 
-                # TODO: investigate why there are some games where the state does not change
-                # our fault or GI's fault? !!!!!!!!!!!!!!
-                print(f"game_state: {game_state}")
+            action = agent.act(game_state)
+            # print(action) # outcomment this for better visibility
+            prev_state = game_state
+            # inject here the next state based on send action
 
-                action = agent.act(game_state)
-                # print(action) # outcomment this for better visibility
-                prev_state = game_state
-                # inject here the next state based on send action
+            next_state, reward, done, action_from_ai = state.step(action)
 
-
-                # experiment: needs next state for learning of agent
-                action_json = json.dumps({"action": action})
-                
-                if state.player.active != False:
-                    print(f"tot? :: {state.player.active}")
-                    await ws.send(action_json)
-                    # investigate why we are instant dead :-(
+            # experiment: needs next state for learning of agent
+            action_json = json.dumps({"action": action_from_ai})
+            
+            if state.player.active != False:
+                print(f"tot? :: {state.player.active}")
+                print(f"gesendete antwort :: {action_json}")
+                await ws.send(action_json)
+                # investigate why we are instant dead :-( -> wrong action send
 
             try:
                 ans = await ws.recv()
             except Exception as e:
-                # TODO: why are we having here an exception?
-                ans = None
-                print('Reconnecting')
-                # ws = await websockets.connect(URI)
-                break # needed? -> yes
                 print(f"the problem: {e}")
+                time.sleep(2.0) # workaround for too quickly reconnecting
+                break # needed, because game is over
 
-            print("kommen wir nach dem senden, noch weiter?")
-
-            if ans is not None:
-                # next_state, reward, done, _ = state.step(action)
-                next_state, reward, done, action_from_ai = state.step(action) # fix wrong next state bug
-                # print(f"next_state: {next_state}")
-
-                
-                state = Speed(json.loads(ans))
-                game_state = state.get_state_speed()
-                game_state = np.reshape(game_state, (1, state.state_space))
+            # next_state, reward, done, action_from_ai = state.step(action) # is this ok to comment this out?
+            
+            state = Speed(json.loads(ans))
+            game_state = state.get_state_speed()
+            game_state = np.reshape(game_state, (1, state.state_space))
 
 
-                print(f"next_state ist eigentlich der previous state aus der fkt: {next_state} und hier der richtige next state: {game_state}")
+            print(f"next_state ist eigentlich der previous state aus der fkt: {next_state} und hier der richtige next state: {game_state}")
+            next_state = game_state # to fix this
 
 
-                score += reward
-                next_state = np.reshape(next_state, (1, state.state_space))
-                agent.remember(game_state, action, reward, next_state, done)
-                game_state = next_state
-                if params['batch_size'] > 1:
-                    agent.replay()
+            score += reward
+            next_state = np.reshape(next_state, (1, state.state_space))
+            agent.remember(game_state, action, reward, next_state, done)
+            game_state = next_state
+            if params['batch_size'] > 1:
+                agent.replay() # check this method here how it will be affected
 
-                sum_of_rewards.append(score)
+            sum_of_rewards.append(score)
 
-                results[params['name']] = sum_of_rewards
-                # end of injection
+            results[params['name']] = sum_of_rewards
+            # end of injection
 
-                action = action_from_ai
-                
+            # action = action_from_ai
+            
 
-                # action_json = json.dumps({"action": action})
-
-
-                file = open("JSON Logs/" + initial_time + "_RUNNING.txt", 'a+')
-                file.write("Gewählte Aktion: ")
-                file.write(action_json)
-                file.write("\n")
-                file.close
-                
-                
-                # await ws.send(action_json)
+            # action_json = json.dumps({"action": action})
 
 
-                print("Action sent: ", action)
+            file = open("JSON Logs/" + initial_time + "_RUNNING.txt", 'a+')
+            file.write("Gewählte Aktion: ")
+            file.write(action_json)
+            file.write("\n")
+            file.close
+            
+            
+            # await ws.send(action_json)
+
+
+            # print("Action sent: ", action)
 
     print("AFTER game ready: TIME: ", datetime.now(), flush=True)
+
+
+    agent.model.save('models/')
 
 
 def main():

@@ -1,46 +1,28 @@
-from gym.utils import seeding
+from keras.optimizers import Adam
+import matplotlib.pyplot as plt
+from keras.layers import Dense
+from collections import deque
 from datetime import datetime
-from gym import spaces
+from keras import Sequential
+import numpy as np
 import websockets
 import asyncio
 import turtle
 import random
+import keras
 import time
 import math
-import gym
 import json
 import os
 
-
-###
-# DQN Agent
-
-import random
-import numpy as np
-from keras import Sequential
-import keras
-from collections import deque
-from keras.layers import Dense
-import matplotlib.pyplot as plt
-from keras.optimizers import Adam
-
-###
-
-###
-# Globals
-
+### Globals
 URI = "wss://msoll.de/spe_ed?key=LSIS7VOFLXCISR3K4YUSZ3CN2Z3CF74PEB7EKE4AQ7PDVKAGTYVOZVXP"
 
-HEIGHT = 20      # number of steps vertically from wall to wall of screen
-WIDTH = 20       # number of steps horizontally from wall to wall of screen
-
 COUNTER = 0
-
 ###
+
 class DQN:
-
     """ Deep Q Network """
-
     def __init__(self, env, params):
 
         self.action_space = env.action_space
@@ -77,9 +59,6 @@ class DQN:
 
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
-        # print(f"================================================================================================================================================")
-        # print(f"der memory vom DQN: {self.memory}")
-        # print(f"================================================================================================================================================")
 
 
     def act(self, state):
@@ -134,11 +113,11 @@ class GameState():
     # Method to get the bodylocations for each playe
     def getPlayersBodyLocations(self, cells):
 
-        #Get and save the location of all playerbodys
+        # Get and save the location of all playerbodys
         allPlayerBodyCords = []
 
         playerNr = 1
-        #Check for each player the location and save as a list (0-58 rows, 0-76 columns in this example)
+        # Check for each player the location and save as a list (0-58 rows, 0-76 columns in this example)
         while playerNr < 7:
             playerBodyCords = []
 
@@ -205,7 +184,7 @@ class Player():
         print(self.id, ': ', self.x, self.y, self.direction, self.speed, self.active)
 
 
-class Speed(gym.Env):
+class Speed():
     def __init__(self, data, human=False, env_info={'state_space' : None}):
         self.gamestate = GameState(data)
         self.returned_action = None
@@ -213,7 +192,6 @@ class Speed(gym.Env):
         #########
 
         self.done = False
-        self.seed() # check why this is used
         self.reward = 0
         self.action_space = 5 # changed from 4 -> 5 because we have choose from 5 actions in total
         self.state_space = 12 # changed from 12 -> 12 because we have 13 nececessary information about state 
@@ -231,11 +209,6 @@ class Speed(gym.Env):
             self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
         else:
             self.dist = math.sqrt((self.player.x - self.gamestate.players[1].x)**2 + (self.player.y - self.gamestate.players[1].y)**2)
-
-
-    def seed(self, seed=None):
-        self.np_random, seed = seeding.np_random(seed)
-        return [seed]
 
 
     def measure_distance(self):
@@ -383,8 +356,6 @@ class Speed(gym.Env):
         else: body_left = 0
         """
 
-        # state: apple_up, apple_right, apple_down, apple_left, obstacle_up, obstacle_right, obstacle_down, obstacle_left, direction_up, direction_right, direction_down, direction_left
-        # spe_ed_state: enemy_up, enemy_right, enemy_down, enemy_left, obstacle_up, obstacle_right, obstacle_down, obstacle_left, direction_up, direction_right, direction_down, direction_left, turn_left, turn_right, slow_down, speed_up, change_nothing
         # spe_ed_state: enemy_up, enemy_right, enemy_down, enemy_left, obstacle_up, obstacle_right, obstacle_down, obstacle_left, direction_up, direction_right, direction_down, direction_left (are we needing an action here?)
         """
         if self.env_info['state_space'] == 'coordinates':
@@ -404,45 +375,12 @@ class Speed(gym.Env):
                     int(wall_up or body_up), int(wall_right or body_right), int(wall_down or body_down), int(wall_left or body_left), \
                     int(self.snake.direction == 'up'), int(self.snake.direction == 'right'), int(self.snake.direction == 'down'), int(self.snake.direction == 'left')]
         """ 
-        # print(state) # state of the current step of the game
 
         state = [int(player_y < enemy_y), int(player_x < enemy_x), int(player_y > enemy_y), int(player_x > enemy_x), \
                 int(wall_up), int(wall_right), int(wall_down), int(wall_left), \
                 int(self.player.direction == 'up'), int(self.player.direction == 'right'), int(self.player.direction == 'down'), int(self.player.direction == 'left')]
 
-        # print(f"der state aus der get_state funktion: {state}")
-
         return state
-
-
-
-def train_dqn(episode, env):
-
-    sum_of_rewards = []
-    agent = DQN(env, params)
-
-    for e in range(episode):
-        state = env.reset()
-        state = np.reshape(state, (1, env.state_space))
-        score = 0
-        max_steps = 10000
-        for i in range(max_steps):
-            action = agent.act(state)
-            # print(action) # outcomment this for better visibility
-            prev_state = state
-            next_state, reward, done, _ = env.step(action)
-            score += reward
-            next_state = np.reshape(next_state, (1, env.state_space))
-            agent.remember(state, action, reward, next_state, done)
-            state = next_state
-            if params['batch_size'] > 1:
-                agent.replay()
-            if done:
-                print(f'final state before dying: {str(prev_state)}')
-                print(f'episode: {e+1}/{episode}, score: {score}')
-                break
-        sum_of_rewards.append(score)
-    return sum_of_rewards
 
 
 async def connection(sum_of_rewards):
@@ -473,7 +411,6 @@ async def connection(sum_of_rewards):
             
             if not started : started = True
             
-            # if ans is not None:
             state = Speed(json.loads(ans))
             
             stateString = GameState(json.loads(ans))
@@ -493,13 +430,10 @@ async def connection(sum_of_rewards):
             print(f"game_state: {game_state}")
 
             action = agent.act(game_state)
-            # print(action) # outcomment this for better visibility
             prev_state = game_state
-            # inject here the next state based on send action
 
             next_state, reward, done, action_from_ai = state.step(action)
 
-            # experiment: needs next state for learning of agent
             action_json = json.dumps({"action": action_from_ai})
             
             if state.player.active != False:
@@ -515,8 +449,6 @@ async def connection(sum_of_rewards):
                 time.sleep(2.0) # workaround for too quickly reconnecting
                 break # needed, because game is over
 
-            # next_state, reward, done, action_from_ai = state.step(action) # is this ok to comment this out?
-            
             state = Speed(json.loads(ans))
             game_state = state.get_state_speed()
             game_state = np.reshape(game_state, (1, state.state_space))
@@ -536,13 +468,6 @@ async def connection(sum_of_rewards):
             sum_of_rewards.append(score)
 
             results[params['name']] = sum_of_rewards
-            # end of injection
-
-            # action = action_from_ai
-            
-
-            # action_json = json.dumps({"action": action})
-
 
             file = open("JSON Logs/" + initial_time + "_RUNNING.txt", 'a+')
             file.write("Gewählte Aktion: ")
@@ -550,14 +475,7 @@ async def connection(sum_of_rewards):
             file.write("\n")
             file.close
             
-            
-            # await ws.send(action_json)
-
-
-            # print("Action sent: ", action)
-
     print("AFTER game ready: TIME: ", datetime.now(), flush=True)
-
 
     agent.model.save('models/')
 
@@ -573,3 +491,4 @@ def main():
 
 if __name__ == '__main__':            
     main()
+    
