@@ -69,9 +69,9 @@ class DQN:
 
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
-        print(f"================================================================================================================================================")
-        print(f"der memory vom DQN: {self.memory}")
-        print(f"================================================================================================================================================")
+        # print(f"================================================================================================================================================")
+        # print(f"der memory vom DQN: {self.memory}")
+        # print(f"================================================================================================================================================")
 
 
     def act(self, state):
@@ -498,16 +498,16 @@ async def connection(sum_of_rewards):
                 print(f"tot? :: {state.player.active}")
                 print(f"gesendete antwort :: {action_json}")
                 await ws.send(action_json)
-                # investigate why we are instant dead :-(
+                # investigate why we are instant dead :-( -> wrong action send
 
             try:
                 ans = await ws.recv()
             except Exception as e:
                 print(f"the problem: {e}")
                 time.sleep(2.0) # workaround for too quickly reconnecting
-                break # needed? -> yes, sometimes it is too early and then we get a 429 :-(, maybe time.sleep(2.0)?
+                break # needed, because game is over
 
-            next_state, reward, done, action_from_ai = state.step(action)
+            # next_state, reward, done, action_from_ai = state.step(action) # is this ok to comment this out?
             
             state = Speed(json.loads(ans))
             game_state = state.get_state_speed()
@@ -530,7 +530,7 @@ async def connection(sum_of_rewards):
             results[params['name']] = sum_of_rewards
             # end of injection
 
-            action = action_from_ai
+            # action = action_from_ai
             
 
             # action_json = json.dumps({"action": action})
@@ -546,7 +546,7 @@ async def connection(sum_of_rewards):
             # await ws.send(action_json)
 
 
-            print("Action sent: ", action)
+            # print("Action sent: ", action)
 
     print("AFTER game ready: TIME: ", datetime.now(), flush=True)
 
