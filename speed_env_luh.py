@@ -69,6 +69,9 @@ class DQN:
 
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
+        print(f"================================================================================================================================================")
+        print(f"der memory vom DQN: {self.memory}")
+        print(f"================================================================================================================================================")
 
 
     def act(self, state):
@@ -215,7 +218,11 @@ class Speed(gym.Env):
 
         # TODO: implement here all the enemies
         # distance between first enemy and player
-        self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
+        # self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
+        if self.gamestate.players[0].id != self.player.id:
+            self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
+        else:
+            self.dist = math.sqrt((self.player.x - self.gamestate.players[1].x)**2 + (self.player.y - self.gamestate.players[1].y)**2)
 
 
     def seed(self, seed=None):
@@ -395,7 +402,7 @@ class Speed(gym.Env):
                 int(wall_up), int(wall_right), int(wall_down), int(wall_left), \
                 int(self.player.direction == 'up'), int(self.player.direction == 'right'), int(self.player.direction == 'down'), int(self.player.direction == 'left')]
 
-        print(f"der state aus der get_state funktion: {state}")
+        # print(f"der state aus der get_state funktion: {state}")
 
         return state
 
@@ -458,98 +465,88 @@ async def connection(sum_of_rewards):
             
             if not started : started = True
             
-            if ans is not None:
-                # state = Speed.GameState(json.loads(ans))
-                state = Speed(json.loads(ans))
-                
-                stateString = GameState(json.loads(ans))
+            # if ans is not None:
+            state = Speed(json.loads(ans))
+            
+            stateString = GameState(json.loads(ans))
+            stateString.json_to_file(json.loads(ans), 0, initial_time)
+
+            # print(state.gamestate.players)
+            if not state.gamestate.running:
                 stateString.json_to_file(json.loads(ans), 0, initial_time)
+                break
+            
+            game_state = state.get_state_speed()
+            game_state = np.reshape(game_state, (1, state.state_space))
+            score = 0
 
-                # print(state.gamestate.players)
-                if not state.gamestate.running:
-                    stateString.json_to_file(json.loads(ans), 0, initial_time)
-                    break
-                
-                game_state = state.get_state_speed()
-                game_state = np.reshape(game_state, (1, state.state_space))
-                score = 0
+            agent = DQN(state, params)
 
-                agent = DQN(state, params)
+            print(f"game_state: {game_state}")
 
-                # TODO: investigate why there are some games where the state does not change
-                # our fault or GI's fault? !!!!!!!!!!!!!!
-                print(f"game_state: {game_state}")
+            action = agent.act(game_state)
+            # print(action) # outcomment this for better visibility
+            prev_state = game_state
+            # inject here the next state based on send action
 
-                action = agent.act(game_state)
-                # print(action) # outcomment this for better visibility
-                prev_state = game_state
-                # inject here the next state based on send action
+            next_state, reward, done, action_from_ai = state.step(action)
 
-
-                # experiment: needs next state for learning of agent
-                action_json = json.dumps({"action": action})
-                
-                if state.player.active != False:
-                    print(f"tot? :: {state.player.active}")
-                    await ws.send(action_json)
-                    # investigate why we are instant dead :-(
+            # experiment: needs next state for learning of agent
+            action_json = json.dumps({"action": action_from_ai})
+            
+            if state.player.active != False:
+                print(f"tot? :: {state.player.active}")
+                print(f"gesendete antwort :: {action_json}")
+                await ws.send(action_json)
+                # investigate why we are instant dead :-(
 
             try:
                 ans = await ws.recv()
             except Exception as e:
-                # TODO: why are we having here an exception?
-                ans = None
-                print('Reconnecting')
-                # ws = await websockets.connect(URI)
+                print(f"the problem: {e}")
                 time.sleep(2.0) # workaround for too quickly reconnecting
                 break # needed? -> yes, sometimes it is too early and then we get a 429 :-(, maybe time.sleep(2.0)?
-                print(f"the problem: {e}")
 
-            print("kommen wir nach dem senden, noch weiter?")
-
-            if ans is not None:
-                # next_state, reward, done, _ = state.step(action)
-                next_state, reward, done, action_from_ai = state.step(action) # fix wrong next state bug
-                # print(f"next_state: {next_state}")
-
-                
-                state = Speed(json.loads(ans))
-                game_state = state.get_state_speed()
-                game_state = np.reshape(game_state, (1, state.state_space))
+            next_state, reward, done, action_from_ai = state.step(action)
+            
+            state = Speed(json.loads(ans))
+            game_state = state.get_state_speed()
+            game_state = np.reshape(game_state, (1, state.state_space))
 
 
-                print(f"next_state ist eigentlich der previous state aus der fkt: {next_state} und hier der richtige next state: {game_state}")
+            print(f"next_state ist eigentlich der previous state aus der fkt: {next_state} und hier der richtige next state: {game_state}")
+            next_state = game_state # to fix this
 
 
-                score += reward
-                next_state = np.reshape(next_state, (1, state.state_space))
-                agent.remember(game_state, action, reward, next_state, done)
-                game_state = next_state
-                if params['batch_size'] > 1:
-                    agent.replay()
+            score += reward
+            next_state = np.reshape(next_state, (1, state.state_space))
+            agent.remember(game_state, action, reward, next_state, done)
+            game_state = next_state
+            if params['batch_size'] > 1:
+                agent.replay() # check this method here how it will be affected
 
-                sum_of_rewards.append(score)
+            sum_of_rewards.append(score)
 
-                results[params['name']] = sum_of_rewards
-                # end of injection
+            results[params['name']] = sum_of_rewards
+            # end of injection
 
-                action = action_from_ai
-                
+            action = action_from_ai
+            
 
-                # action_json = json.dumps({"action": action})
-
-
-                file = open("JSON Logs/" + initial_time + "_RUNNING.txt", 'a+')
-                file.write("Gewählte Aktion: ")
-                file.write(action_json)
-                file.write("\n")
-                file.close
-                
-                
-                # await ws.send(action_json)
+            # action_json = json.dumps({"action": action})
 
 
-                print("Action sent: ", action)
+            file = open("JSON Logs/" + initial_time + "_RUNNING.txt", 'a+')
+            file.write("Gewählte Aktion: ")
+            file.write(action_json)
+            file.write("\n")
+            file.close
+            
+            
+            # await ws.send(action_json)
+
+
+            print("Action sent: ", action)
 
     print("AFTER game ready: TIME: ", datetime.now(), flush=True)
 
