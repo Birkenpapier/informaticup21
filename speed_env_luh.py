@@ -46,12 +46,16 @@ class Speed():
         # TODO: implement here all the enemies
         # distance between first enemy and player
         # self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
+        
         if self.gamestate.players[0].id != self.player.id:
             self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
         else:
             self.dist = math.sqrt((self.player.x - self.gamestate.players[1].x)**2 + (self.player.y - self.gamestate.players[1].y)**2)
+        
+        self.prev_dist = 0
 
-    # TODO: check why the results are the same
+    # TODO: check why the results are the same -> because same state is used for measurement
+    
     def measure_distance(self):
         print(f"1: die berechnung aus measure_distance: self.gamestate.players[0].id: {self.gamestate.players[0].id}, self.player.id: {self.player.id}, ")
         print(f"2: die berechnung aus measure_distance: self.player.x: {self.player.x}, self.player.y: {self.player.y}, ")
@@ -64,11 +68,34 @@ class Speed():
             self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
         else:
             self.dist = math.sqrt((self.player.x - self.gamestate.players[1].x)**2 + (self.player.y - self.gamestate.players[1].y)**2)
+    
+
+    def measure_distance_async(self, prev_state, state):
+        print(f"2==2: die berechnung aus measure_distance: self.player.x: {self.player.x}, self.player.y: {self.player.y}, ")
+        print(f"3==3: die berechnung aus measure_distance: self.prev_state.players[0].x: {prev_state.gamestate.players[0].x}, self.prev_state.players[0].y: {prev_state.gamestate.players[0].y}, ")
+        print(f"4==4: die berechnung aus measure_distance: self.prev_state.players[0].x: {state.gamestate.players[0].x}, self.prev_state.players[0].y: {state.gamestate.players[0].y}, ")
+
+        self.prev_dist = self.dist
+        # self.dist = math.sqrt((self.snake.xcor()-self.apple.xcor())**2 + (self.snake.ycor()-self.apple.ycor())**2)
+        if state.gamestate.players[0].id != self.player.id:
+            self.dist = math.sqrt((self.player.x - state.gamestate.players[0].x)**2 + (self.player.y - state.gamestate.players[0].y)**2)
+        else:
+            self.dist = math.sqrt((self.player.x - state.gamestate.players[1].x)**2 + (self.player.y - state.gamestate.players[1].y)**2)
 
 
     def wall_check(self):
         if self.player.x > 200 or self.player.x < -200 or self.player.y > 200 or self.player.y < -200:
             return True
+
+
+    def enemy_dead_check(self):
+        # TODO: implement only for new dead enemies, not already dead ones
+        # TODO: check if this statement is working
+        for enemy in self.gamestate.players:
+            if enemy.id != self.player.id:
+                if enemy.active == False:
+                    return True
+
 
     def run_game(self):
         reward_given = False
@@ -94,6 +121,11 @@ class Speed():
         """
         """output"""
         
+        if self.enemy_dead_check():
+            print("==========> enemy dead is true (DO NOT FORGET TO IMPROVE)")
+            self.reward = 10
+            reward_given = True
+
         self.measure_distance()
 
         if not reward_given:
@@ -140,7 +172,12 @@ class Speed():
         # self.apple.xsc, self.apple.ysc = self.apple.x/WIDTH+0.5, self.apple.y/HEIGHT+0.5
         # spe_ed
         # not scaled
-        enemy_x, enemy_y = self.gamestate.players[0].x, self.gamestate.players[0].y
+        # enemy_x, enemy_y = self.gamestate.players[0].x, self.gamestate.players[0].y
+        if self.gamestate.players[0].id != self.player.id:
+            enemy_x, enemy_y = self.gamestate.players[0].x, self.gamestate.players[0].y
+        else:
+            enemy_x, enemy_y = self.gamestate.players[1].x, self.gamestate.players[1].y
+
         # enemy_x, enemy_y = self.gamestate.players[0].x / self.gamestate.width + 0.5, self.gamestate.players[0].y  / self.gamestate.height + 0.5
 
         # wall check
@@ -230,9 +267,6 @@ class Speed():
 
 
 async def connection(sum_of_rewards):
-    global COUNTER
-    COUNTER = 0
-    
     # injection of DQN agent
     params = dict()
     params['name'] = None
@@ -260,33 +294,36 @@ async def connection(sum_of_rewards):
             
             if not started : started = True
             
-            state = Speed(json.loads(ans))
+            spe_ed_game = Speed(json.loads(ans))
             
             stateString = GameState(json.loads(ans))
             stateString.json_to_file(json.loads(ans), 0, initial_time)
 
-            # print(state.gamestate.players)
-            if not state.gamestate.running:
+            # print(spe_ed_game.gamestate.players)
+            if not spe_ed_game.gamestate.running:
                 stateString.json_to_file(json.loads(ans), 0, initial_time)
                 break
             
-            game_state = state.get_state_speed()
-            game_state = np.reshape(game_state, (1, state.state_space))
+            game_state = spe_ed_game.get_state_speed()
+            game_state = np.reshape(game_state, (1, spe_ed_game.state_space))
             score = 0
 
-            agent = DQN(state, params)
+            agent = DQN(spe_ed_game, params) # TODO: evaluate if it's smarter to create agent only once and only update state
 
             print(f"game_state: {game_state}")
 
             action = agent.act(game_state)
             prev_state = game_state
+            # exp
+            prev_spe_ed_game = spe_ed_game
+            # eexp
 
-            next_state, reward, done, action_from_ai = state.step(action)
+            next_state, reward, done, action_from_ai = spe_ed_game.step(action)
 
             action_json = json.dumps({"action": action_from_ai})
             
-            if state.player.active != False:
-                print(f"tot? :: {state.player.active}")
+            if spe_ed_game.player.active != False:
+                print(f"tot? :: !{spe_ed_game.player.active}")
                 print(f"gesendete antwort :: {action_json}")
                 await ws.send(action_json)
                 # investigate why we are instant dead :-( -> wrong action send
@@ -298,17 +335,19 @@ async def connection(sum_of_rewards):
                 time.sleep(2.0) # workaround for too quickly reconnecting
                 break # needed, because game is over
 
-            state = Speed(json.loads(ans))
-            game_state = state.get_state_speed()
-            game_state = np.reshape(game_state, (1, state.state_space))
+            spe_ed_game = Speed(json.loads(ans))
+            game_state = spe_ed_game.get_state_speed()
+            game_state = np.reshape(game_state, (1, spe_ed_game.state_space))
 
 
             print(f"next_state ist eigentlich der previous state aus der fkt: {next_state} und hier der richtige next state: {game_state}")
             next_state = game_state # to fix this
 
+            spe_ed_game.measure_distance_async(prev_spe_ed_game, spe_ed_game) # to fix wrong dist calculation (dirty workaround, needs to be cleaner)
+            _, reward, _, _ = spe_ed_game.step(action) # reward after action is done
 
             score += reward
-            next_state = np.reshape(next_state, (1, state.state_space))
+            next_state = np.reshape(next_state, (1, spe_ed_game.state_space))
             agent.remember(game_state, action, reward, next_state, done)
             game_state = next_state
             if params['batch_size'] > 1:
