@@ -122,7 +122,7 @@ class Speed():
         """output"""
         
         if self.enemy_dead_check():
-            print("==========> enemy dead is true (DO NOT FORGET TO IMPROVE)")
+            print("==========> enemy dead is true (DO NOT FORGET TO IMPROVE)") # because to many goo rewards with this
             self.reward = 10
             reward_given = True
 
