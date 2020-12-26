@@ -75,7 +75,7 @@ class Speed():
         print(f"3==3: die berechnung aus measure_distance: self.prev_state.players[0].x: {prev_state.gamestate.players[0].x}, self.prev_state.players[0].y: {prev_state.gamestate.players[0].y}, ")
         print(f"4==4: die berechnung aus measure_distance: self.prev_state.players[0].x: {state.gamestate.players[0].x}, self.prev_state.players[0].y: {state.gamestate.players[0].y}, ")
 
-        self.prev_dist = self.dist
+        # self.prev_dist = self.dist
         # self.dist = math.sqrt((self.snake.xcor()-self.apple.xcor())**2 + (self.snake.ycor()-self.apple.ycor())**2)
         if state.gamestate.players[0].id != self.player.id:
             self.dist = math.sqrt((self.player.x - state.gamestate.players[0].x)**2 + (self.player.y - state.gamestate.players[0].y)**2)
