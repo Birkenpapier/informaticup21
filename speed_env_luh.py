@@ -212,6 +212,11 @@ class Speed():
 
     # TODO: check why the results are the same
     def measure_distance(self):
+        print(f"1: die berechnung aus measure_distance: self.gamestate.players[0].id: {self.gamestate.players[0].id}, self.player.id: {self.player.id}, ")
+        print(f"2: die berechnung aus measure_distance: self.player.x: {self.player.x}, self.player.y: {self.player.y}, ")
+        print(f"3: die berechnung aus measure_distance: self.gamestate.players[0].x: {self.gamestate.players[0].x}, self.gamestate.players[0].y: {self.gamestate.players[0].y}, ")
+
+
         self.prev_dist = self.dist
         # self.dist = math.sqrt((self.snake.xcor()-self.apple.xcor())**2 + (self.snake.ycor()-self.apple.ycor())**2)
         if self.gamestate.players[0].id != self.player.id:
@@ -384,6 +389,9 @@ class Speed():
 
 
 async def connection(sum_of_rewards):
+    global COUNTER
+    COUNTER = 0
+    
     # injection of DQN agent
     params = dict()
     params['name'] = None
