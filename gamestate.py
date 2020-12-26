@@ -15,6 +15,8 @@ import math
 import json
 import os
 
+COUNTER = 0
+
 class GameState():
     def __init__(self, data):
         # print(data) # print the received json
