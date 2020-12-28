@@ -60,6 +60,9 @@ class Speed():
 
     # TODO: check why the results are the same -> because same state is used for measurement
     
+    # deprecated, pls do not use this function
+    # only left for old architectural documentation, will be removed in future release
+    """
     def measure_distance(self):
         print(f"1: die berechnung aus measure_distance: self.gamestate.players[0].id: {self.gamestate.players[0].id}, self.player.id: {self.player.id}, ")
         print(f"2: die berechnung aus measure_distance: self.player.x: {self.player.x}, self.player.y: {self.player.y}, ")
@@ -72,12 +75,12 @@ class Speed():
             self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
         else:
             self.dist = math.sqrt((self.player.x - self.gamestate.players[1].x)**2 + (self.player.y - self.gamestate.players[1].y)**2)
-    
+    """
 
     def measure_distance_async(self, prev_state, state):
-        print(f"2==2: die berechnung aus measure_distance: self.player.x: {self.player.x}, self.player.y: {self.player.y}, ")
-        print(f"3==3: die berechnung aus measure_distance: self.prev_state.players[0].x: {prev_state.gamestate.players[0].x}, self.prev_state.players[0].y: {prev_state.gamestate.players[0].y}, ")
-        print(f"4==4: die berechnung aus measure_distance: self.prev_state.players[0].x: {state.gamestate.players[0].x}, self.prev_state.players[0].y: {state.gamestate.players[0].y}, ")
+        print(f"2==2: die berechnung aus measure_distance_async: self.player.x: {self.player.x}, self.player.y: {self.player.y}, ")
+        print(f"3==3: die berechnung aus measure_distance_async: self.prev_state.players[0].x: {prev_state.gamestate.players[0].x}, self.prev_state.players[0].y: {prev_state.gamestate.players[0].y}, ")
+        print(f"4==4: die berechnung aus measure_distance_async: self.prev_state.players[0].x: {state.gamestate.players[0].x}, self.prev_state.players[0].y: {state.gamestate.players[0].y}, ")
 
         if state.gamestate.players[0].id != self.player.id:
             self.prev_dist = math.sqrt((prev_state.player.x - prev_state.gamestate.players[0].x)**2 + (prev_state.player.y - prev_state.gamestate.players[0].y)**2)
@@ -114,14 +117,12 @@ class Speed():
 
     def run_game(self):
         reward_given = False
-        # self.move_snake()
         """        
         if self.move_apple():
             self.reward = 10
             reward_given = True
         
         # self.move_snakebody()
-        # self.measure_distance()
         
         if self.body_check_snake():
             self.reward = -100
@@ -192,28 +193,18 @@ class Speed():
         # spe_ed
         # not scaled
         # enemy_x, enemy_y = self.gamestate.players[0].x, self.gamestate.players[0].y
+        
+        # take closest enemy instead of the first enemy
+        for enemy in self.gamestate.players:
+            if enemy.id != self.player.id:
+                closest_dist = math.sqrt((self.player.x - state.gamestate.players[0].x)**2 + (self.player.y - state.gamestate.players[0].y)**2)
+
         if self.gamestate.players[0].id != self.player.id:
             enemy_x, enemy_y = self.gamestate.players[0].x, self.gamestate.players[0].y
         else:
             enemy_x, enemy_y = self.gamestate.players[1].x, self.gamestate.players[1].y
 
         # enemy_x, enemy_y = self.gamestate.players[0].x / self.gamestate.width + 0.5, self.gamestate.players[0].y  / self.gamestate.height + 0.5
-
-        # wall check
-        """
-        if self.snake.y >= HEIGHT/2:
-            wall_up, wall_down = 1, 0
-        elif self.snake.y <= -HEIGHT/2:
-            wall_up, wall_down = 0, 1
-        else:
-            wall_up, wall_down = 0, 0
-        if self.snake.x >= WIDTH/2:
-            wall_right, wall_left = 1, 0
-        elif self.snake.x <= -WIDTH/2:
-            wall_right, wall_left = 0, 1
-        else:
-            wall_right, wall_left = 0, 0
-        """
 
         # wall check
         if player_y >= self.gamestate.height / 2:
@@ -229,7 +220,7 @@ class Speed():
         else:
             wall_right, wall_left = 0, 0
 
-        # check how we can implement the bodylength, we definetly need it
+        # check how we can implement the bodylength, we definetly need it -> Dominik did implement this in
         """
         # body close
         body_up = []
@@ -358,10 +349,10 @@ async def connection(sum_of_rewards):
             game_state = spe_ed_game.get_state_speed()
             game_state = np.reshape(game_state, (1, spe_ed_game.state_space))
 
-
             print(f"next_state ist eigentlich der previous state aus der fkt: {next_state} und hier der richtige next state: {game_state}")
             next_state = game_state # to fix this
 
+            # TODO: evaluate if it's smart to punish if dead for the rest of the game, or only rewards for lifetime
             spe_ed_game.measure_distance_async(prev_spe_ed_game, spe_ed_game) # to fix wrong dist calculation (dirty workaround, needs to be cleaner)
             _, reward, _, _ = spe_ed_game.step(action) # reward after action is done
 
@@ -369,6 +360,7 @@ async def connection(sum_of_rewards):
             next_state = np.reshape(next_state, (1, spe_ed_game.state_space))
             agent.remember(game_state, action, reward, next_state, done)
             game_state = next_state
+            
             if params['batch_size'] > 1:
                 agent.replay() # check this method here how it will be affected
 
