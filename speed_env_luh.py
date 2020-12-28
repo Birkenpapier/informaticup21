@@ -18,6 +18,7 @@ import math
 import json
 import os
 
+
 ### Globals
 URI = "wss://msoll.de/spe_ed?key=LSIS7VOFLXCISR3K4YUSZ3CN2Z3CF74PEB7EKE4AQ7PDVKAGTYVOZVXP"
 
@@ -32,12 +33,10 @@ class Speed():
         self.gamestate = GameState(data)
         self.returned_action = None
 
-        #########
-
         self.done = False
         self.reward = 0
-        self.action_space = 5 # changed from 4 -> 5 because we have choose from 5 actions in total
-        self.state_space = 12 # changed from 12 -> 12 because we have 13 nececessary information about state 
+        self.action_space = 5
+        self.state_space = 12
 
         self.total, self.maximum = 0, 0
         self.env_info = env_info
@@ -52,10 +51,8 @@ class Speed():
         
         self.prev_dist = 0
 
-        self.dead_enemies = DECEASED_ENEMIES # [] # list with all deceased enemies
+        self.dead_enemies = DECEASED_ENEMIES # list with all deceased enemies
 
-    # TODO: check why the results are the same -> because same state is used for measurement
-    
     # deprecated, pls do not use this function
     # only left for old architectural documentation, will be removed in future release
     """
@@ -386,6 +383,8 @@ async def connection(sum_of_rewards):
 
 
 def main():
+    global DECEASED_ENEMIES
+    
     ep = 1 # 50
     sum_of_rewards = []
 
