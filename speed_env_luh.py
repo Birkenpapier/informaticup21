@@ -193,6 +193,7 @@ class Speed():
         closest_enemy = 0
         closest_dist = 0
 
+        # TODO: check if good for loop and if good state in general
         for enemy in self.gamestate.players:
             if enemy.id != self.player.id and enemy.active == True:
                 closest_dist = math.sqrt((self.player.x - enemy.x)**2 + (self.player.y - enemy.y)**2)
