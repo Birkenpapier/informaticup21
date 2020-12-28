@@ -179,7 +179,7 @@ class Speed():
         # snake coordinates scaled 0-1
         # self.snake.xsc, self.snake.ysc = self.snake.x/WIDTH+0.5, self.snake.y/HEIGHT+0.5
         # spe_ed
-        player_xsc, player_ysc = self.player.x / self.gamestate.width + 0.5, self.player.y / self.gamestate.height + 0.5
+        player_xsc, player_ysc = self.player.x / self.gamestate.width + 0.5, self.player.y / self.gamestate.height + 0.5 # TODO: implement usage of var
 
 
         # apple coordintes scaled 0-1 
@@ -326,7 +326,7 @@ async def connection(sum_of_rewards):
             print(f"game_state: {game_state}")
 
             action = agent.act(game_state)
-            prev_state = game_state
+            prev_state = game_state # TODO: implement usage of var
             # exp
             prev_spe_ed_game = spe_ed_game
             # eexp
