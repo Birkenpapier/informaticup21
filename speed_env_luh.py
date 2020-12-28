@@ -54,6 +54,8 @@ class Speed():
         
         self.prev_dist = 0
 
+        self.dead_enemies = []
+
     # TODO: check why the results are the same -> because same state is used for measurement
     
     def measure_distance(self):
@@ -94,7 +96,15 @@ class Speed():
         for enemy in self.gamestate.players:
             if enemy.id != self.player.id:
                 if enemy.active == False:
-                    return True
+                    is_already_dead = enemy.id in self.dead_enemies
+
+                    if not is_already_dead:
+                        self.dead_enemies.append(enemy.id)
+
+                        return True
+                    else:
+                        
+                        return False
 
 
     def run_game(self):
@@ -122,7 +132,7 @@ class Speed():
         """output"""
         
         if self.enemy_dead_check():
-            print("==========> enemy dead is true (DO NOT FORGET TO IMPROVE)") # because to many goo rewards with this
+            print("==========> enemy dead is true (DO NOT FORGET TO IMPROVE)") # because to many good rewards with this
             self.reward = 10
             reward_given = True
 
