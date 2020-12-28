@@ -45,10 +45,6 @@ class Speed():
         self.player = self.gamestate.players[int(self.gamestate.you) - 1] # self.GameState.Player()
         self.snake_body = [] # snake body, add first element (for location of snake's head)
 
-        # TODO: implement here all the enemies
-        # distance between first enemy and player
-        # self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
-        
         if self.gamestate.players[0].id != self.player.id:
             self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
         else:
@@ -77,6 +73,7 @@ class Speed():
             self.dist = math.sqrt((self.player.x - self.gamestate.players[1].x)**2 + (self.player.y - self.gamestate.players[1].y)**2)
     """
 
+    # TODO: change this to closes enemy and not first
     def measure_distance_async(self, prev_state, state):
         print(f"2==2: die berechnung aus measure_distance_async: self.player.x: {self.player.x}, self.player.y: {self.player.y}, ")
         print(f"3==3: die berechnung aus measure_distance_async: self.prev_state.players[0].x: {prev_state.gamestate.players[0].x}, self.prev_state.players[0].y: {prev_state.gamestate.players[0].y}, ")
@@ -195,16 +192,25 @@ class Speed():
         # enemy_x, enemy_y = self.gamestate.players[0].x, self.gamestate.players[0].y
         
         # take closest enemy instead of the first enemy
-        for enemy in self.gamestate.players:
-            if enemy.id != self.player.id:
-                closest_dist = math.sqrt((self.player.x - state.gamestate.players[0].x)**2 + (self.player.y - state.gamestate.players[0].y)**2)
+        previous_distance = 2000
+        closest_enemy = 0
 
+        for enemy in self.gamestate.players:
+            if enemy.id != self.player.id and enemy.active == True:
+                closest_dist = math.sqrt((self.player.x - enemy.x)**2 + (self.player.y - enemy.y)**2)
+
+            if closest_dist < previous_distance:
+                previous_distance = closest_dist
+                closest_enemy = enemy.id
+
+        enemy_x, enemy_y = self.gamestate.players[closest_enemy - 1].x, self.gamestate.players[closest_enemy - 1].y
+
+        """
         if self.gamestate.players[0].id != self.player.id:
             enemy_x, enemy_y = self.gamestate.players[0].x, self.gamestate.players[0].y
         else:
             enemy_x, enemy_y = self.gamestate.players[1].x, self.gamestate.players[1].y
-
-        # enemy_x, enemy_y = self.gamestate.players[0].x / self.gamestate.width + 0.5, self.gamestate.players[0].y  / self.gamestate.height + 0.5
+        """
 
         # wall check
         if player_y >= self.gamestate.height / 2:
