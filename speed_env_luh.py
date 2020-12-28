@@ -191,6 +191,7 @@ class Speed():
         # take closest enemy instead of the first enemy
         previous_distance = 2000
         closest_enemy = 0
+        closest_dist = 0
 
         for enemy in self.gamestate.players:
             if enemy.id != self.player.id and enemy.active == True:
