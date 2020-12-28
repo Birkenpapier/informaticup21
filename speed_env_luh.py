@@ -22,11 +22,13 @@ import os
 URI = "wss://msoll.de/spe_ed?key=LSIS7VOFLXCISR3K4YUSZ3CN2Z3CF74PEB7EKE4AQ7PDVKAGTYVOZVXP"
 
 COUNTER = 0
+
+DECEASED_ENEMIES = []
 ###
 
 
 class Speed():
-    def __init__(self, data, human=False, env_info={'state_space' : None}):
+    def __init__(self, data, env_info={'state_space' : None}):
         self.gamestate = GameState(data)
         self.returned_action = None
 
@@ -54,7 +56,7 @@ class Speed():
         
         self.prev_dist = 0
 
-        self.dead_enemies = []
+        self.dead_enemies = DECEASED_ENEMIES # [] # list with all deceased enemies
 
     # TODO: check why the results are the same -> because same state is used for measurement
     
@@ -77,8 +79,11 @@ class Speed():
         print(f"3==3: die berechnung aus measure_distance: self.prev_state.players[0].x: {prev_state.gamestate.players[0].x}, self.prev_state.players[0].y: {prev_state.gamestate.players[0].y}, ")
         print(f"4==4: die berechnung aus measure_distance: self.prev_state.players[0].x: {state.gamestate.players[0].x}, self.prev_state.players[0].y: {state.gamestate.players[0].y}, ")
 
-        # self.prev_dist = self.dist
-        # self.dist = math.sqrt((self.snake.xcor()-self.apple.xcor())**2 + (self.snake.ycor()-self.apple.ycor())**2)
+        if state.gamestate.players[0].id != self.player.id:
+            self.prev_dist = math.sqrt((prev_state.player.x - prev_state.gamestate.players[0].x)**2 + (prev_state.player.y - prev_state.gamestate.players[0].y)**2)
+        else:
+            self.prev_dist = math.sqrt((prev_state.player.x - prev_state.gamestate.players[1].x)**2 + (prev_state.player.y - prev_state.gamestate.players[1].y)**2)
+
         if state.gamestate.players[0].id != self.player.id:
             self.dist = math.sqrt((self.player.x - state.gamestate.players[0].x)**2 + (self.player.y - state.gamestate.players[0].y)**2)
         else:
@@ -92,18 +97,18 @@ class Speed():
 
     def enemy_dead_check(self):
         # TODO: implement only for new dead enemies, not already dead ones
-        # TODO: check if this statement is working
         for enemy in self.gamestate.players:
             if enemy.id != self.player.id:
                 if enemy.active == False:
                     is_already_dead = enemy.id in self.dead_enemies
 
+                    print(f"===============================> DEBUG FROM enemy_dead_check: is_already_dead: {is_already_dead}, enemy.id: {enemy.id}, self.dead_enemies: {self.dead_enemies}")
                     if not is_already_dead:
                         self.dead_enemies.append(enemy.id)
 
                         return True
                     else:
-                        
+
                         return False
 
 
@@ -130,13 +135,17 @@ class Speed():
             self.done = True
         """
         """output"""
+
+        if self.player.active == False:
+            self.reward = -100 # punish the shit out of him for beeing dead
+            reward_given = True
         
         if self.enemy_dead_check():
-            print("==========> enemy dead is true (DO NOT FORGET TO IMPROVE)") # because to many good rewards with this
             self.reward = 10
             reward_given = True
 
-        self.measure_distance()
+        # comment this because we need previous distance from previous state which is called in __name__ == "__main__"
+        # self.measure_distance()
 
         if not reward_given:
             print(f"reward funktion results: {self.dist}, {self.prev_dist}, {self.dist < self.prev_dist}")
@@ -379,11 +388,13 @@ async def connection(sum_of_rewards):
 
 
 def main():
-    ep = 2 # 50
+    ep = 1 # 50
     sum_of_rewards = []
 
     for e in range(ep):
         asyncio.get_event_loop().run_until_complete(connection(sum_of_rewards))
+
+        DECEASED_ENEMIES = [] # because list is always will be init with [] (maybe better implementation?)
 
     print(f"das ist die sum_of_rewards: {sum_of_rewards}")
 
