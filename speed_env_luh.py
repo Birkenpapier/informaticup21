@@ -58,7 +58,6 @@ class Speed():
         # print(f"3==3: die berechnung aus measure_distance_async: self.prev_state.players[0].x: {prev_state.gamestate.players[0].x}, self.prev_state.players[0].y: {prev_state.gamestate.players[0].y}, ")
         # print(f"4==4: die berechnung aus measure_distance_async: self.prev_state.players[0].x: {state.gamestate.players[0].x}, self.prev_state.players[0].y: {state.gamestate.players[0].y}, ")
 
-
         previous_distance = 2000
         closest_enemy = 0
         closest_dist = 0
@@ -73,18 +72,6 @@ class Speed():
                 closest_enemy = enemy.id
 
         closest_enemy_to_player = prev_state.gamestate.players[closest_enemy - 1]
-
-        """
-        if state.gamestate.players[0].id != self.player.id:
-            self.prev_dist = math.sqrt((prev_state.player.x - prev_state.gamestate.players[0].x)**2 + (prev_state.player.y - prev_state.gamestate.players[0].y)**2)
-        else:
-            self.prev_dist = math.sqrt((prev_state.player.x - prev_state.gamestate.players[1].x)**2 + (prev_state.player.y - prev_state.gamestate.players[1].y)**2)
-
-        if state.gamestate.players[0].id != self.player.id:
-            self.dist = math.sqrt((self.player.x - state.gamestate.players[0].x)**2 + (self.player.y - state.gamestate.players[0].y)**2)
-        else:
-            self.dist = math.sqrt((self.player.x - state.gamestate.players[1].x)**2 + (self.player.y - state.gamestate.players[1].y)**2)
-        """
 
         self.prev_dist = math.sqrt((prev_state.player.x - closest_enemy_to_player.x)**2 + (prev_state.player.y - closest_enemy_to_player.y)**2)
 
@@ -114,6 +101,7 @@ class Speed():
 
     def run_game(self):
         reward_given = False
+        
         if self.player.active == False:
             self.reward = -100 # punish the shit out of him for beeing dead
             reward_given = True
@@ -241,10 +229,10 @@ async def connection(sum_of_rewards):
 
             agent = DQN(spe_ed_game, params) # TODO: evaluate if it's smarter to create agent only once and only update state
 
-            print(f"game_state: {game_state}")
+            print(f"previouse game_state: {game_state}")
 
             action = agent.act(game_state)
-            prev_state = game_state # TODO: implement usage of var
+            # prev_state = game_state # TODO: implement usage of var
             # exp
             prev_spe_ed_game = spe_ed_game
             # eexp
@@ -270,8 +258,8 @@ async def connection(sum_of_rewards):
             game_state = spe_ed_game.get_state_speed()
             game_state = np.reshape(game_state, (1, spe_ed_game.state_space))
 
-            print(f"next_state ist eigentlich der previous state aus der fkt: {next_state} und hier der richtige next state: {game_state}")
-            next_state = game_state # to fix this
+            print(f"new next game_state: {game_state}")
+            next_state = game_state # to fix this old state as next state
 
             # TODO: evaluate if it's smart to punish if dead for the rest of the game, or only rewards for lifetime
             spe_ed_game.measure_distance_async(prev_spe_ed_game, spe_ed_game) # to fix wrong dist calculation (dirty workaround, needs to be cleaner)
