@@ -305,6 +305,8 @@ def main():
     sum_of_rewards = []
 
     for e in range(ep):
+        print(f"EPOCH {e} from {ep}")
+
         asyncio.get_event_loop().run_until_complete(connection(sum_of_rewards))
 
         DECEASED_ENEMIES = [] # because list is always will be init with [] (maybe better implementation?)
