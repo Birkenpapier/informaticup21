@@ -70,12 +70,29 @@ class Speed():
             self.dist = math.sqrt((self.player.x - self.gamestate.players[1].x)**2 + (self.player.y - self.gamestate.players[1].y)**2)
     """
 
-    # TODO: change this to closes enemy and not first
+    # TODO: change this to closest enemy and not first
     def measure_distance_async(self, prev_state, state):
         print(f"2==2: die berechnung aus measure_distance_async: self.player.x: {self.player.x}, self.player.y: {self.player.y}, ")
         print(f"3==3: die berechnung aus measure_distance_async: self.prev_state.players[0].x: {prev_state.gamestate.players[0].x}, self.prev_state.players[0].y: {prev_state.gamestate.players[0].y}, ")
         print(f"4==4: die berechnung aus measure_distance_async: self.prev_state.players[0].x: {state.gamestate.players[0].x}, self.prev_state.players[0].y: {state.gamestate.players[0].y}, ")
 
+
+        previous_distance = 2000
+        closest_enemy = 0
+        closest_dist = 0
+
+        # TODO: check if good for loop and if good state in general
+        for enemy in prev_state.gamestate.players:
+            if enemy.id != self.player.id and enemy.active == True:
+                closest_dist = math.sqrt((self.player.x - enemy.x)**2 + (self.player.y - enemy.y)**2)
+
+            if closest_dist < previous_distance:
+                previous_distance = closest_dist
+                closest_enemy = enemy.id
+
+        closest_enemy_to_player = prev_state.gamestate.players[closest_enemy - 1]
+
+        """
         if state.gamestate.players[0].id != self.player.id:
             self.prev_dist = math.sqrt((prev_state.player.x - prev_state.gamestate.players[0].x)**2 + (prev_state.player.y - prev_state.gamestate.players[0].y)**2)
         else:
@@ -85,6 +102,11 @@ class Speed():
             self.dist = math.sqrt((self.player.x - state.gamestate.players[0].x)**2 + (self.player.y - state.gamestate.players[0].y)**2)
         else:
             self.dist = math.sqrt((self.player.x - state.gamestate.players[1].x)**2 + (self.player.y - state.gamestate.players[1].y)**2)
+        """
+
+        self.prev_dist = math.sqrt((prev_state.player.x - closest_enemy_to_player.x)**2 + (prev_state.player.y - closest_enemy_to_player.y)**2)
+
+        self.dist = math.sqrt((self.player.x - closest_enemy_to_player.x)**2 + (self.player.y - closest_enemy_to_player.y)**2)
 
 
     def wall_check(self):
