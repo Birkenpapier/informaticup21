@@ -53,28 +53,10 @@ class Speed():
 
         self.dead_enemies = DECEASED_ENEMIES # list with all deceased enemies
 
-    # deprecated, pls do not use this function
-    # only left for old architectural documentation, will be removed in future release
-    """
-    def measure_distance(self):
-        print(f"1: die berechnung aus measure_distance: self.gamestate.players[0].id: {self.gamestate.players[0].id}, self.player.id: {self.player.id}, ")
-        print(f"2: die berechnung aus measure_distance: self.player.x: {self.player.x}, self.player.y: {self.player.y}, ")
-        print(f"3: die berechnung aus measure_distance: self.gamestate.players[0].x: {self.gamestate.players[0].x}, self.gamestate.players[0].y: {self.gamestate.players[0].y}, ")
-
-
-        self.prev_dist = self.dist
-        # self.dist = math.sqrt((self.snake.xcor()-self.apple.xcor())**2 + (self.snake.ycor()-self.apple.ycor())**2)
-        if self.gamestate.players[0].id != self.player.id:
-            self.dist = math.sqrt((self.player.x - self.gamestate.players[0].x)**2 + (self.player.y - self.gamestate.players[0].y)**2)
-        else:
-            self.dist = math.sqrt((self.player.x - self.gamestate.players[1].x)**2 + (self.player.y - self.gamestate.players[1].y)**2)
-    """
-
-    # TODO: change this to closest enemy and not first
     def measure_distance_async(self, prev_state, state):
-        print(f"2==2: die berechnung aus measure_distance_async: self.player.x: {self.player.x}, self.player.y: {self.player.y}, ")
-        print(f"3==3: die berechnung aus measure_distance_async: self.prev_state.players[0].x: {prev_state.gamestate.players[0].x}, self.prev_state.players[0].y: {prev_state.gamestate.players[0].y}, ")
-        print(f"4==4: die berechnung aus measure_distance_async: self.prev_state.players[0].x: {state.gamestate.players[0].x}, self.prev_state.players[0].y: {state.gamestate.players[0].y}, ")
+        # print(f"2==2: die berechnung aus measure_distance_async: self.player.x: {self.player.x}, self.player.y: {self.player.y}, ")
+        # print(f"3==3: die berechnung aus measure_distance_async: self.prev_state.players[0].x: {prev_state.gamestate.players[0].x}, self.prev_state.players[0].y: {prev_state.gamestate.players[0].y}, ")
+        # print(f"4==4: die berechnung aus measure_distance_async: self.prev_state.players[0].x: {state.gamestate.players[0].x}, self.prev_state.players[0].y: {state.gamestate.players[0].y}, ")
 
 
         previous_distance = 2000
@@ -115,13 +97,12 @@ class Speed():
 
 
     def enemy_dead_check(self):
-        # TODO: implement only for new dead enemies, not already dead ones
         for enemy in self.gamestate.players:
             if enemy.id != self.player.id:
                 if enemy.active == False:
                     is_already_dead = enemy.id in self.dead_enemies
 
-                    print(f"===============================> DEBUG FROM enemy_dead_check: is_already_dead: {is_already_dead}, enemy.id: {enemy.id}, self.dead_enemies: {self.dead_enemies}")
+                    # print(f"===============================> DEBUG FROM enemy_dead_check: is_already_dead: {is_already_dead}, enemy.id: {enemy.id}, self.dead_enemies: {self.dead_enemies}")
                     if not is_already_dead:
                         self.dead_enemies.append(enemy.id)
 
@@ -133,26 +114,6 @@ class Speed():
 
     def run_game(self):
         reward_given = False
-        """        
-        if self.move_apple():
-            self.reward = 10
-            reward_given = True
-        
-        # self.move_snakebody()
-        
-        if self.body_check_snake():
-            self.reward = -100
-            reward_given = True
-            self.done = True
-        """
-        """
-        if self.wall_check():
-            self.reward = -100
-            reward_given = True
-            self.done = True
-        """
-        """output"""
-
         if self.player.active == False:
             self.reward = -100 # punish the shit out of him for beeing dead
             reward_given = True
@@ -247,7 +208,7 @@ class Speed():
         else:
             wall_right, wall_left = 0, 0
 
-        # check how we can implement the bodylength, we definetly need it -> Dominik did implement this in
+        # check how we can implement the bodylength, we definetly need it -> Dominik implemented this
         """
         # body close
         body_up = []
