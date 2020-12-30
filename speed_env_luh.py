@@ -255,6 +255,7 @@ async def connection(sum_of_rewards):
                 await ws.send(action_json)
                 # investigate why we are instant dead :-( -> wrong action send
 
+            # TODO: investivate -> AttributeError: 'NoneType' object has no attribute 'resume_reading'; why is this happening?
             try:
                 ans = await ws.recv()
             except Exception as e:
