@@ -49,7 +49,7 @@ class Speed():
         else:
             self.dist = math.sqrt((self.player.x - self.gamestate.players[1].x)**2 + (self.player.y - self.gamestate.players[1].y)**2)
         
-        self.prev_dist = 0
+        self.prev_dist = 0 # TODO: evaluate if it's smarter if it only once get initialized (maybe better only speed once init?)
         self.prev_body_len = 0
 
         self.dead_enemies = DECEASED_ENEMIES # list with all deceased enemies
@@ -81,6 +81,7 @@ class Speed():
 
     def wall_check(self):
         if self.player.x > 200 or self.player.x < -200 or self.player.y > 200 or self.player.y < -200:
+            
             return True
 
 
@@ -102,6 +103,7 @@ class Speed():
 
     def player_length_check(self, prev_state, state):
         if len(prev_state.player.body_coords) < len(state.player.body_coords):
+            
             return True
 
 
@@ -298,7 +300,7 @@ async def connection(sum_of_rewards):
 def main():
     global DECEASED_ENEMIES
 
-    ep = 2 # 50
+    ep = 20 # 50
     sum_of_rewards = []
 
     for e in range(ep):
