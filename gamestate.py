@@ -33,7 +33,7 @@ class GameState():
             self.deadline = ''
 
     # Method to get the bodylocations for each playe
-    def getPlayersBodyLocations(self, cells):
+    def get_players_body_locations(self, cells):
 
         # Get and save the location of all playerbodys
         allPlayerBodyCords = []
@@ -61,13 +61,13 @@ class GameState():
     
     def get_players(self, player_list, cells):
         # Get body coordinates for each player
-        bodyCoords = self.getPlayersBodyLocations(cells)
+        body_coords = self.get_players_body_locations(cells)
 
         ret = []
         id = 1
         while True:
             try:
-                ret.append(Player(id, player_list[str(id)], bodyCoords))
+                ret.append(Player(id, player_list[str(id)], body_coords))
             except KeyError:
                 break
             id += 1
@@ -91,16 +91,17 @@ class GameState():
 
 
 class Player():
-    def __init__(self, id, info, bodyCoords):
+    def __init__(self, id, info, body_coords):
         self.id = id
         self.x = info['x']
         self.y = info['y']
         self.direction = info['direction']
         self.speed = info['speed']
         self.active = info['active']
-        self.bodyCoords = bodyCoords[id-1]
+        self.body_coords = body_coords[id - 1]
         # self.name = info['name'] # nicht notwendig
-        # print(bodyCoords)
+        # TODO: implement only length of our player and not all players
+        # print(f"body_coords: {body_coords}, len(body_coords): {len(body_coords)}")
 
     def display(self):
         print(self.id, ': ', self.x, self.y, self.direction, self.speed, self.active)

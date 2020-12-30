@@ -50,6 +50,7 @@ class Speed():
             self.dist = math.sqrt((self.player.x - self.gamestate.players[1].x)**2 + (self.player.y - self.gamestate.players[1].y)**2)
         
         self.prev_dist = 0
+        self.prev_body_len = 0
 
         self.dead_enemies = DECEASED_ENEMIES # list with all deceased enemies
 
@@ -99,9 +100,14 @@ class Speed():
                         return False
 
 
+    def player_length_check(self, prev_state, state):
+        if len(prev_state.player.body_coords) < len(state.player.body_coords):
+            return True
+
+
     def run_game(self):
         reward_given = False
-        
+
         if self.player.active == False:
             self.reward = -100 # punish the shit out of him for beeing dead
             reward_given = True
@@ -258,11 +264,12 @@ async def connection(sum_of_rewards):
             game_state = spe_ed_game.get_state_speed()
             game_state = np.reshape(game_state, (1, spe_ed_game.state_space))
 
-            print(f"new next game_state: {game_state}")
+            print(f"new next game_state:  {game_state}")
             next_state = game_state # to fix this old state as next state
 
             # TODO: evaluate if it's smart to punish if dead for the rest of the game, or only rewards for lifetime
             spe_ed_game.measure_distance_async(prev_spe_ed_game, spe_ed_game) # to fix wrong dist calculation (dirty workaround, needs to be cleaner)
+            # spe_ed_game.player_length_check(prev_spe_ed_game, spe_ed_game) # TODO: improve shitty calculation in gamestate.py
             _, reward, _, _ = spe_ed_game.step(action) # reward after action is done
 
             score += reward
@@ -291,7 +298,7 @@ async def connection(sum_of_rewards):
 def main():
     global DECEASED_ENEMIES
 
-    ep = 1 # 50
+    ep = 2 # 50
     sum_of_rewards = []
 
     for e in range(ep):
