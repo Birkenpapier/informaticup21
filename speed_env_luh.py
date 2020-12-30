@@ -129,6 +129,7 @@ class Speed():
                 self.reward = -1
 
 
+    # TODO: precheck if slow down or speed up is possible -> else is instant death
     # AI agent
     def step(self, action):
         if action == 0:
