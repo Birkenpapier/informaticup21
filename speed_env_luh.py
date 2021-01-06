@@ -242,15 +242,11 @@ async def connection(sum_of_rewards):
             game_state = np.reshape(game_state, (1, spe_ed_game.state_space))
             score = 0
 
-            # agent = DQN(spe_ed_game, params) # TODO: evaluate if it's smarter to create agent only once and only update state
-
             print(f"previouse game_state: {game_state}")
 
             action = agent.act(game_state)
             # prev_state = game_state # TODO: implement usage of var
-            # exp
             prev_spe_ed_game = spe_ed_game
-            # eexp
 
             next_state, reward, done, action_from_ai = spe_ed_game.step(action)
 
@@ -260,9 +256,7 @@ async def connection(sum_of_rewards):
                 print(f"tot? :: !{spe_ed_game.player.active}")
                 print(f"gesendete antwort :: {action_json}")
                 await ws.send(action_json)
-                # investigate why we are instant dead :-( -> wrong action send
 
-            # TODO: investivate -> AttributeError: 'NoneType' object has no attribute 'resume_reading'; why is this happening?
             try:
                 ans = await ws.recv()
             except Exception as e:
@@ -277,8 +271,7 @@ async def connection(sum_of_rewards):
             print(f"new next game_state:  {game_state}")
             next_state = game_state # to fix this old state as next state
 
-            # TODO: evaluate if it's smart to punish if dead for the rest of the game, or only rewards for lifetime
-            spe_ed_game.measure_distance_async(prev_spe_ed_game, spe_ed_game) # to fix wrong dist calculation (dirty workaround, needs to be cleaner)
+            spe_ed_game.measure_distance_async(prev_spe_ed_game, spe_ed_game)
             # spe_ed_game.player_length_check(prev_spe_ed_game, spe_ed_game) # TODO: improve shitty calculation in gamestate.py
             _, reward, _, _ = spe_ed_game.step(action) # reward after action is done
 
