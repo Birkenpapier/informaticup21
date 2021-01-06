@@ -19,8 +19,10 @@ class DQN():
     """ Deep Q Network """
     def __init__(self, env, params):
 
-        self.action_space = env.action_space
-        self.state_space = env.state_space
+        # self.action_space = env.action_space
+        # self.state_space = env.state_space
+        self.action_space = env["action_space"]
+        self.state_space = env["state_space"]
         self.epsilon = params['epsilon'] 
         self.gamma = params['gamma'] 
         self.batch_size = params['batch_size'] 

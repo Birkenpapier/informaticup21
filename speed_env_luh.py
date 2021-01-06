@@ -207,7 +207,13 @@ async def connection(sum_of_rewards):
     params['layer_sizes'] = [128, 128, 128]
 
     results = dict()
-    
+
+    spe_ed_enviroment = {
+        "action_space": 5,
+        "state_space": 12
+    }
+    agent = DQN(spe_ed_enviroment, params) # init agent only once instead of every iteration
+
     async with websockets.connect(URI) as ws:
 
         print("Waiting for initial state...", flush=True)
@@ -236,7 +242,7 @@ async def connection(sum_of_rewards):
             game_state = np.reshape(game_state, (1, spe_ed_game.state_space))
             score = 0
 
-            agent = DQN(spe_ed_game, params) # TODO: evaluate if it's smarter to create agent only once and only update state
+            # agent = DQN(spe_ed_game, params) # TODO: evaluate if it's smarter to create agent only once and only update state
 
             print(f"previouse game_state: {game_state}")
 
@@ -302,7 +308,7 @@ async def connection(sum_of_rewards):
 def main():
     global DECEASED_ENEMIES
 
-    ep = 20 # 50
+    ep = 2 # 20, 50
     sum_of_rewards = []
 
     for e in range(ep):
