@@ -118,9 +118,6 @@ class Speed():
             self.reward = 10
             reward_given = True
 
-        # comment this because we need previous distance from previous state which is called in __name__ == "__main__"
-        # self.measure_distance()
-
         if not reward_given:
             print(f"reward funktion results: {self.dist}, {self.prev_dist}, {self.dist < self.prev_dist}")
             if self.dist < self.prev_dist:
