@@ -98,7 +98,9 @@ class Player():
         self.direction = info['direction']
         self.speed = info['speed']
         self.active = info['active']
-        self.body_coords = body_coords[id - 1]
+        self.player_body_coords = body_coords[id - 1]
+
+
         # self.name = info['name'] # nicht notwendig
         # TODO: implement only length of our player and not all players
         # print(f"body_coords: {body_coords}, len(body_coords): {len(body_coords)}")
