@@ -62,7 +62,7 @@ class DQN():
 
 
     def remember(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
+        self.memory.append([state, action, reward, next_state, done])
 
 
     def act(self, state):
@@ -105,7 +105,7 @@ class DQN():
         file = open(file_path, 'wb')
         pickle.dump(self.memory, file)
         file.close()
-        print("AI:: Memory saved")
+        print("AI:: Memory saved    Memory:", len(self.memory))
         
     def load_memory(self, obj_name):
         if os.path.isfile(obj_name): 
@@ -113,7 +113,7 @@ class DQN():
             obj_deque = pickle.load(file)
             self.memory += obj_deque    #what if saved_memory > memory len
             file.close()
-            print("AI:: Memory loaded")
+            print("AI:: Memory loaded     Memory:", len(self.memory))
         else:
             print("AI:: No file found")
     
@@ -128,7 +128,7 @@ class DQN():
         self.params['layer_sizes'] = self.layer_sizes
         pickle.dump(self.params, file)
         file.close()
-        print("AI:: Params saved")
+        print("AI:: Params saved    Epsilon:", self.params['epsilon'])
     
     def load_params(self, obj_name, reset):
         if not reset and  os.path.isfile(obj_name):
