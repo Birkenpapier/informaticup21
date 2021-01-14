@@ -21,4 +21,4 @@ RUN python -c "import flask"
 
 
 COPY speed_env_luh.py .
-ENTRYPOINT ["python", "speed_env_luh.py"]
+ENTRYPOINT ["python", "speed_env_luh_update.py"]

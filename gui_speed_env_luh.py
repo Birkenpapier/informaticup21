@@ -18,11 +18,18 @@ import math
 import json
 import os
 import cv2
+import sys
 
 
 ### Globals
-URI = "wss://msoll.de/spe_ed?key=LSIS7VOFLXCISR3K4YUSZ3CN2Z3CF74PEB7EKE4AQ7PDVKAGTYVOZVXP"
-
+if len(sys.argv) == 1:
+    URI = "wss://msoll.de/spe_ed?key=LSIS7VOFLXCISR3K4YUSZ3CN2Z3CF74PEB7EKE4AQ7PDVKAGTYVOZVXP"
+    print("Default input: " + URI)
+else:
+    url = sys.argv[1]
+    key = sys.argv[2]
+    URI = f"{url}?key={key}"
+    print("Custom input: " + URI)
 COUNTER = 0
 
 DECEASED_ENEMIES = []

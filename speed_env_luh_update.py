@@ -17,10 +17,18 @@ import time
 import math
 import json
 import os
+import sys
 
 
 ### Globals
-URI = "wss://msoll.de/spe_ed?key=LSIS7VOFLXCISR3K4YUSZ3CN2Z3CF74PEB7EKE4AQ7PDVKAGTYVOZVXP"
+if len(sys.argv) == 1:
+    URI = "wss://msoll.de/spe_ed?key=LSIS7VOFLXCISR3K4YUSZ3CN2Z3CF74PEB7EKE4AQ7PDVKAGTYVOZVXP"
+    print("Default input: " + URI)
+else:
+    url = sys.argv[1]
+    key = sys.argv[2]
+    URI = f"{url}?key={key}"
+    print("Custom input: " + URI)
 
 COUNTER = 0
 
@@ -256,7 +264,7 @@ async def connection():
 def main():
     global DECEASED_ENEMIES
 
-    ep = 10 # 20, 50
+    ep = 1 # 20, 50
     sum_of_rewards = []
 
     for e in range(ep):
