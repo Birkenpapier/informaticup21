@@ -33,6 +33,7 @@ class DQN():
         self.epsilon_decay = self.params['epsilon_decay'] 
         self.learning_rate = self.params['learning_rate']
         self.layer_sizes = self.params['layer_sizes']
+        self.epoch = self.params['epoch']
         self.memory = deque(maxlen=2500)
         # self.model = self.build_model()
 
@@ -126,9 +127,10 @@ class DQN():
         self.params['epsilon_decay'] = self.epsilon_decay
         self.params['learning_rate'] = self.learning_rate
         self.params['layer_sizes'] = self.layer_sizes
+        self.params['epoch'] = self.epoch
         pickle.dump(self.params, file)
         file.close()
-        print("AI:: Params saved    Epsilon:", self.params['epsilon'])
+        print("AI:: Params saved    Epsilon:", self.params['epsilon'], "Game:", self.params['epoch'])
     
     def load_params(self, obj_name, reset):
         if not reset and  os.path.isfile(obj_name):
@@ -144,5 +146,6 @@ class DQN():
             self.params['epsilon_decay'] = .995
             self.params['learning_rate'] = 0.0005
             self.params['layer_sizes'] = [94, 188, 94]
-            self.params['tau'] = 0.125           
+            self.params['tau'] = 0.125        
+            self.params['epoch'] = 1
             print("AI:: Params set to standard")

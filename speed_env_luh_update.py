@@ -254,7 +254,7 @@ async def connection():
     #    print("HTTP 429")
     #    time.sleep(30)
     print("AFTER game ready: TIME: ", datetime.now(), flush=True)
-
+    agent.epoch += 1
     agent.model.save('models/')
     print("AI:: Model saved")
     agent.save_memory('memories.obj')
