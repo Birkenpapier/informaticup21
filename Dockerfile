@@ -9,6 +9,7 @@ RUN conda env create -f environment.yml
 RUN conda install --file requirements.txt
 RUN conda install -c conda-forge gym
 RUN conda install -c jmcmurray os
+RUN conda install -c conda-forge opencv
 RUN pip install datetime
 RUN pip install websockets
 RUN pip install matplotlib
