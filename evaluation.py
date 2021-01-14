@@ -24,21 +24,22 @@ class Evaluation():
         
     def calc_reward(self):
         reward_given = False
+        self.reward = 0
 
         if self.moved_to_enemy_check():
-            self.reward = 1
+            self.reward += 1
             reward_given = True
 
         if self.env.player.active == False:
-            self.reward = -100 # punish the shit out of him for beeing dead
+            self.reward -= 100 # punish the shit out of him for beeing dead
             reward_given = True
         
         if self.enemy_dead_check(self.env.gamestate):
-            self.reward = 10
+            self.reward += 10
             reward_given = True
 
         if self.ai_suicide_check():
-            self.reward = -150
+            self.reward -= 150
             reward_given = True
 
 
@@ -51,9 +52,9 @@ class Evaluation():
         if not reward_given:
             print(f"reward funktion results: {self.env.dist}, {self.env.prev_dist}, {self.env.dist < self.env.prev_dist}")
             if self.env.dist < self.env.prev_dist:
-                self.reward = 1
+                self.reward += 1
             else:
-                self.reward = -1
+                self.reward -= 1
                 
         #add reward to game
         return self.reward

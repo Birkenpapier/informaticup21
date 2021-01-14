@@ -18,8 +18,9 @@ import os
 COUNTER = 0
 
 class GameState():
-    def __init__(self, data):
+    def __init__(self, data, initial_time):
         # print(data) # print the received json
+        self.json_to_file(data, 0, initial_time)
         self.width = data['width']
         self.height = data['height']
         self.cells = data['cells']

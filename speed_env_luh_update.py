@@ -197,7 +197,7 @@ async def connection():
             
             #load answ
             json_ans = json.loads(ans)
-            state = GameState(json_ans)
+            state = GameState(json_ans, initial_time)
             #update the game (Speed) after receiving the new state
             env.update(state)
             print("Speed:: State updated")
