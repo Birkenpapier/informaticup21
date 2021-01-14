@@ -72,6 +72,9 @@ class GameState():
                 break
             id += 1
         return ret
+        
+    def get_player(self):
+        return self.players[self.you-1]
 
     def json_to_file(self, input, status, initial_time):
         if (status == 0):
@@ -98,9 +101,7 @@ class Player():
         self.direction = info['direction']
         self.speed = info['speed']
         self.active = info['active']
-        self.player_body_coords = body_coords[id - 1]
-
-
+        self.body_coords = body_coords[id - 1]
         # self.name = info['name'] # nicht notwendig
         # TODO: implement only length of our player and not all players
         # print(f"body_coords: {body_coords}, len(body_coords): {len(body_coords)}")

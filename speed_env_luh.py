@@ -26,7 +26,158 @@ COUNTER = 0
 
 DECEASED_ENEMIES = []
 ###
+def player_attacks_opponent(prev_game, spe_ed_game):
 
+        ai_id = spe_ed_game.player.id
+
+        enemy_prev_x_positions = []
+        enemy_prev_y_positions = []
+
+        enemy_now_x_positions = []
+        enemy_now_y_positions = []
+
+        #Get all player position
+        for player in prev_game.gamestate.players:
+            if(prev_game.player.id != player.id):
+                enemy_prev_x_positions.append(player.x)
+                enemy_prev_y_positions.append(player.y)
+            else:
+                ai_prev_x_pos = player.x
+                ai_prev_y_pos = player.y
+        for player in spe_ed_game.gamestate.players:
+            if(spe_ed_game.player.id != player.id):
+                enemy_now_x_positions.append(player.x)
+                enemy_now_y_positions.append(player.y)
+            else:
+                ai_now_x_pos = player.x
+                ai_now_y_pos = player.y
+
+
+        # print(enemy_prev_x_positions)
+        # print(enemy_prev_y_positions)
+
+        # print(enemy_now_x_positions)
+        # print(enemy_now_y_positions)
+
+        #Check if ai moved to an enemyhead
+        for enemy_prev_x in enemy_prev_x_positions:
+            old_distance = abs(enemy_prev_x - ai_prev_x_pos)
+            new_distance = abs(enemy_prev_x - ai_now_x_pos)
+            if(new_distance < old_distance):
+                return True
+
+        for enemy_prev_y in enemy_prev_y_positions:
+            old_distance = abs(enemy_prev_y - ai_prev_y_pos)
+            new_distance = abs(enemy_prev_y - ai_now_y_pos)
+            if(new_distance < old_distance):
+                return True
+
+        return False
+
+
+def enemy_ran_into_aibody(prev_game, spe_ed_game):
+
+        ai_id = spe_ed_game.player.id
+
+        players = spe_ed_game.gamestate.players
+
+        b = False
+
+        for player in players:
+            if(player.active == False):
+                print("Dead")
+                print(player.x)
+                print(player.y)
+                print(player.player_body_coords)
+                b = True
+
+            if(b == True):
+                print(player.player_body_coords)
+
+        if(b== True):
+            time.sleep(500000)
+
+
+        
+
+
+
+
+
+        # #Get all player position
+        # for player in prev_game.gamestate.players:
+        #     if(prev_game.player.id != player.id):
+        #         enemy_prev_x_positions.append(player.x)
+        #         enemy_prev_y_positions.append(player.y)
+        #     else:
+        #         ai_prev_x_pos = player.x
+        #         ai_prev_y_pos = player.y
+        # for player in spe_ed_game.gamestate.players:
+        #     if(spe_ed_game.player.id != player.id):
+        #         enemy_now_x_positions.append(player.x)
+        #         enemy_now_y_positions.append(player.y)
+        #     else:
+        #         ai_now_x_pos = player.x
+        #         ai_now_y_pos = player.y
+
+
+        # # print(enemy_prev_x_positions)
+        # # print(enemy_prev_y_positions)
+
+        # # print(enemy_now_x_positions)
+        # # print(enemy_now_y_positions)
+
+        # #Check if ai moved to an enemyhead
+        # for enemy_prev_x in enemy_prev_x_positions:
+        #     old_distance = abs(enemy_prev_x - ai_prev_x_pos)
+        #     new_distance = abs(enemy_prev_x - ai_now_x_pos)
+        #     if(new_distance < old_distance):
+        #         return True
+
+        # for enemy_prev_y in enemy_prev_y_positions:
+        #     old_distance = abs(enemy_prev_y - ai_prev_y_pos)
+        #     new_distance = abs(enemy_prev_y - ai_now_y_pos)
+        #     if(new_distance < old_distance):
+        #         return True
+
+        return False
+
+def ai_suicide(prev_game, spe_ed_game):
+
+        ai_id = spe_ed_game.player.id
+
+        players = spe_ed_game.gamestate.players
+
+        #Check if player was dead in the last round
+        players_last_round = prev_game.gamestate.players
+        for player in players_last_round:
+            if(player.id == ai_id):
+                if(player.active == False):
+                    return False
+
+        #Check if players died between the 2 rounds
+        for player in players:
+            if(player.id == ai_id):
+                    ai_x = player.x
+                    ai_y = player.y
+
+                    if(player.active == False):
+                        #print("AI is dead")
+
+                        #Check if ran into enemy body
+                        for enemy in players:
+                            if(enemy.id != ai_id):
+                                for x, y in enemy.player_body_coords:
+                                    if(((x == ai_x -1) or (x == ai_x +1) or (x == ai_x )) and ((y == ai_y - 1) or (y == ai_y +1) or (y == ai_y))):
+                                        print("Ai ran into enemy")
+                                        return False 
+
+
+
+                        #print("suicide")
+                        return True
+
+        return False
 
 class Speed():
     def __init__(self, data, env_info={'state_space' : None}):
@@ -53,6 +204,8 @@ class Speed():
         self.prev_body_len = 0
 
         self.dead_enemies = DECEASED_ENEMIES # list with all deceased enemies
+        self.suicide = False
+        self.moved_to_enemy = False
 
     def measure_distance_async(self, prev_state, state):
         # print(f"2==2: die berechnung aus measure_distance_async: self.player.x: {self.player.x}, self.player.y: {self.player.y}, ")
@@ -107,8 +260,26 @@ class Speed():
             return True
 
 
+    #check if ai kills itself
+    def ai_suicide_check(self):
+        return self.suicide
+
+    def moved_to_enemy_check(self):
+        return self.moved_to_enemy
+    
+
+
+
+        
+
+       
+
     def run_game(self):
         reward_given = False
+
+        if self.moved_to_enemy_check():
+            self.reward = 1
+            reward_given = True
 
         if self.player.active == False:
             self.reward = -100 # punish the shit out of him for beeing dead
@@ -117,6 +288,17 @@ class Speed():
         if self.enemy_dead_check():
             self.reward = 10
             reward_given = True
+
+        if self.ai_suicide_check():
+            self.reward = -150
+            reward_given = True
+
+
+        #if self.player_attacks_opponent(self.prev_state, self.state):
+         #   self.reward = 15
+
+        # comment this because we need previous distance from previous state which is called in __name__ == "__main__"
+        # self.measure_distance()
 
         if not reward_given:
             print(f"reward funktion results: {self.dist}, {self.prev_dist}, {self.dist < self.prev_dist}")
@@ -195,7 +377,7 @@ async def connection(sum_of_rewards):
     # injection of DQN agent
     params = dict()
     params['name'] = None
-    params['epsilon'] = 1
+    params['epsilon'] = 0.5
     params['gamma'] = .95
     params['batch_size'] = 500
     params['epsilon_min'] = .01
@@ -236,10 +418,12 @@ async def connection(sum_of_rewards):
                 break
             
             game_state = spe_ed_game.get_state_speed()
+            
             game_state = np.reshape(game_state, (1, spe_ed_game.state_space))
             score = 0
 
             print(f"previouse game_state: {game_state}")
+            prev_state = game_state
 
             action = agent.act(game_state)
             # prev_state = game_state # TODO: implement usage of var
@@ -268,7 +452,22 @@ async def connection(sum_of_rewards):
             print(f"new next game_state:  {game_state}")
             next_state = game_state # to fix this old state as next state
 
-            spe_ed_game.measure_distance_async(prev_spe_ed_game, spe_ed_game)
+            # #check if player moved to enemys head            
+            if player_attacks_opponent(prev_spe_ed_game, spe_ed_game):
+                self.moved_to_enemy = True
+
+            #check if player moved to enemys head
+            # if enemy_ran_into_aibody(prev_spe_ed_game, spe_ed_game):
+            #     print("Enemy died")
+            # else:
+            #     print("Enmey alive")
+
+            if ai_suicide(prev_spe_ed_game, spe_ed_game):
+                self.suicide = True
+
+
+            # TODO: evaluate if it's smart to punish if dead for the rest of the game, or only rewards for lifetime
+            spe_ed_game.measure_distance_async(prev_spe_ed_game, spe_ed_game) # to fix wrong dist calculation (dirty workaround, needs to be cleaner)
             # spe_ed_game.player_length_check(prev_spe_ed_game, spe_ed_game) # TODO: improve shitty calculation in gamestate.py
             _, reward, _, _ = spe_ed_game.step(action) # reward after action is done
 
