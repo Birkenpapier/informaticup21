@@ -171,7 +171,7 @@ async def connection():
         print("PRIOR game ready: TIME: ", datetime.now(), flush=True)
         start_time = datetime.now()
         initial_time = start_time.strftime("%m.%d.%Y, %H.%M.%S")
-        started = False
+        started = False # Run Human Motion Imitation
         
         #Speed game
         env = Speed()
@@ -264,7 +264,7 @@ async def connection():
 def main():
     global DECEASED_ENEMIES
 
-    ep = 1 # 20, 50
+    ep = 20 # 1, 20, 50
     sum_of_rewards = []
 
     for e in range(ep):
