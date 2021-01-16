@@ -131,7 +131,8 @@ class DQN():
         # self.params['epoch'] = self.epoch # workaround fix key error 
         pickle.dump(self.params, file)
         file.close()
-        print("AI:: Params saved    Epsilon:", self.params['epsilon'], "Game:", self.params['epoch'])
+        # print("AI:: Params saved    Epsilon:", self.params['epsilon'], "Game:", self.params['epoch'])
+        print("AI:: Params saved    Epsilon:", self.params['epsilon'], "Game:")
     
     def load_params(self, obj_name, reset):
         if not reset and  os.path.isfile(obj_name):
