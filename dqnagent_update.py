@@ -33,7 +33,8 @@ class DQN():
         self.epsilon_decay = self.params['epsilon_decay'] 
         self.learning_rate = self.params['learning_rate']
         self.layer_sizes = self.params['layer_sizes']
-        self.epoch = self.params['epoch']
+        # self.epoch = self.params['epoch']
+        self.epoch = 999 # workaround fix key error 
         self.memory = deque(maxlen=2500)
         # self.model = self.build_model()
 
@@ -45,7 +46,7 @@ class DQN():
         else:
             # print ("File not exist")
             self.model = self.build_model()
-            plot_model(self.model, to_file='model_pl.png', show_shapes=True, show_layer_names= True)
+            # plot_model(self.model, to_file='model_pl.png', show_shapes=True, show_layer_names= True) # error on training machine
             print("AI:: Model built")
             #self.load_params('params.obj', False)   
 
@@ -127,7 +128,7 @@ class DQN():
         self.params['epsilon_decay'] = self.epsilon_decay
         self.params['learning_rate'] = self.learning_rate
         self.params['layer_sizes'] = self.layer_sizes
-        self.params['epoch'] = self.epoch
+        # self.params['epoch'] = self.epoch # workaround fix key error 
         pickle.dump(self.params, file)
         file.close()
         print("AI:: Params saved    Epsilon:", self.params['epsilon'], "Game:", self.params['epoch'])
@@ -147,5 +148,5 @@ class DQN():
             self.params['learning_rate'] = 0.0005
             self.params['layer_sizes'] = [94, 188, 94]
             self.params['tau'] = 0.125        
-            self.params['epoch'] = 1
+            # self.params['epoch'] = 1 # workaround fix key error 
             print("AI:: Params set to standard")

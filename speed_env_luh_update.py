@@ -221,17 +221,17 @@ async def connection():
                 
             else :
                 started = True
-                #enemies_alive, enemies_dead = env.get_enemies()
+                # enemies_alive, enemies_dead = env.get_enemies()
             
-            #if the game ended. mostly reached by winning (or maybe an error?)
+            # if the game ended. mostly reached by winning (or maybe an error?)
             if not env.running :
                 print("Speed:: Game no longer running")
                 break
-            #if the player dies before the game ended
+            # if the player dies before the game ended
             if not env.active:
                 print("Speed:: Player not active. Game ended")
                 break
-            #abbruch!!!
+            # abbruch!!!
             
             print("------------------------------------")
             
@@ -247,10 +247,10 @@ async def connection():
             print("Connection:: Action sent:", move)
         await ws.close()
         print("Connection:: Connection closed")
-    #except Exception as e:
+    # except Exception as e:
     #    print(type(e))
     #    print(e)
-    #    #needs to be implemented. What if the connection is blocked? Maybe a connection error? Or something else
+    #    # needs to be implemented. What if the connection is blocked? Maybe a connection error? Or something else
     #    print("HTTP 429")
     #    time.sleep(30)
     print("AFTER game ready: TIME: ", datetime.now(), flush=True)
