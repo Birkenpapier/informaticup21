@@ -265,7 +265,7 @@ async def connection():
 def main():
     global DECEASED_ENEMIES
 
-    ep = 50 # 1, 20, 50
+    ep = 200 # 1, 20, 50
     sum_of_rewards = []
 
     for e in range(ep):
