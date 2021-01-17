@@ -43,7 +43,7 @@ class Speed():
         self.returned_action = None
 
         self.done = False
-        self.reward = 0
+        self.reward = 0 #Results from the change between the states 
         self.action_space = 5
         self.state_space = 12
         #tester
@@ -65,16 +65,15 @@ class Speed():
         #else:
         #    self.dist = math.sqrt((self.player.x - self.gamestate.players[1].x)**2 + (self.player.y - self.gamestate.players[1].y)**2)
         
-        self.prev_dist = 0 # TODO: evaluate if it's smarter if it only once get initialized (maybe better only speed once init?)
+        self.prev_dist = 0 
         self.prev_body_len = 0
 
         self.dead_enemies = DECEASED_ENEMIES # list with all deceased enemies
         
-        self.suicide = False
-        self.moved_to_enemy = False
+        self.suicide = False # Player killed himself?
+        self.moved_to_enemy = False # Tried to move to an enemy?
 
-    # TODO: precheck if slow down or speed up is possible -> else is instant death
-    # AI agent
+    # Possible actions the AI agent can perform
     def move(self, action):
         move = 'change_nothing'
         if action == 0:
@@ -93,8 +92,9 @@ class Speed():
             self.returned_action = 4
             move = 'change_nothing'
 
-        return move # {}
+        return move 
         
+    # Update the state, so the new state will be the current     
     def update(self, state):
         self.prev_gamestate = self.gamestate
         self.gamestate = state
@@ -113,7 +113,6 @@ class Speed():
         closest_enemy = 0
         closest_dist = 0
 
-        # TODO: check if good for loop and if good state in general
         for enemy in self.gamestate.players:
             if enemy.id != self.player.id and enemy.active == True:
                 closest_dist = math.sqrt((self.player.x - enemy.x)**2 + (self.player.y - enemy.y)**2)
@@ -139,7 +138,6 @@ class Speed():
             wall_right, wall_left = 0, 0
 
         # check how we can implement the bodylength, we definetly need it -> Dominik implemented this
-        # TODO: check whether it's good to determine between wall and enemy made obstacle
         # spe_ed_state: enemy_up, enemy_right, enemy_down, enemy_left, obstacle_up, obstacle_right, obstacle_down, obstacle_left, direction_up, direction_right, direction_down, direction_left (are we needing an action here?)
         state = [int(player_y < enemy_y), int(player_x < enemy_x), int(player_y > enemy_y), int(player_x > enemy_x), \
                 int(wall_up), int(wall_right), int(wall_down), int(wall_left), \
