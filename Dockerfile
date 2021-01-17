@@ -1,6 +1,7 @@
 FROM continuumio/miniconda3
 
 WORKDIR /app
+COPY . /app
 
 SHELL ["/bin/bash", "--login", "-c"]
 
@@ -20,5 +21,5 @@ RUN echo "Make sure flask is installed:"
 RUN python -c "import flask"
 
 
-COPY speed_env_luh.py .
+COPY speed_env_luh_update.py .
 ENTRYPOINT ["python", "speed_env_luh_update.py"]
