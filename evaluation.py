@@ -43,11 +43,6 @@ class Evaluation():
             reward_given = True
 
 
-        #if self.player_attacks_opponent(self.prev_state, self.state):
-         #   self.reward = 15
-
-        # comment this because we need previous distance from previous state which is called in __name__ == "__main__"
-        # self.measure_distance()
 
         if not reward_given:
             print(f"reward funktion results: {self.env.dist}, {self.env.prev_dist}, {self.env.dist < self.env.prev_dist}")
@@ -90,9 +85,6 @@ class Evaluation():
     
     #all are getting GameStates: prev_gamestate and cur_gamestate 
     def measure_distance_async(self, prev_gamestate, cur_gamestate):        #check
-        # print(f"2==2: die berechnung aus measure_distance_async: self.player.x: {self.player.x}, self.player.y: {self.player.y}, ")
-        # print(f"3==3: die berechnung aus measure_distance_async: self.prev_state.players[0].x: {prev_state.gamestate.players[0].x}, self.prev_state.players[0].y: {prev_state.gamestate.players[0].y}, ")
-        # print(f"4==4: die berechnung aus measure_distance_async: self.prev_state.players[0].x: {state.gamestate.players[0].x}, self.prev_state.players[0].y: {state.gamestate.players[0].y}, ")
 
         previous_distance = 2000
         closest_enemy = 0
@@ -101,7 +93,6 @@ class Evaluation():
         cur_player = cur_gamestate.get_player()
         prev_player = prev_gamestate.get_player()
 
-        # TODO: check if good for loop and if good state in general
         for enemy in prev_gamestate.players:
             if enemy.id != cur_player.id and enemy.active == True:
                 closest_dist = math.sqrt((cur_player.x - enemy.x)**2 + (cur_player.y - enemy.y)**2)
@@ -143,11 +134,6 @@ class Evaluation():
                 ai_now_y_pos = player.y
 
 
-        # print(enemy_prev_x_positions)
-        # print(enemy_prev_y_positions)
-
-        # print(enemy_now_x_positions)
-        # print(enemy_now_y_positions)
 
         #Check if ai moved to an enemyhead
         for enemy_prev_x in enemy_prev_x_positions:
@@ -226,49 +212,7 @@ class Evaluation():
                 print(player.body_coords)
 
         if(b== True):
-            time.sleep(500000)
+            time.sleep(1000)
 
-
-        
-
-
-
-
-
-        # #Get all player position
-        # for player in prev_gamestate.gamestate.players:
-        #     if(prev_gamestate.player.id != player.id):
-        #         enemy_prev_x_positions.append(player.x)
-        #         enemy_prev_y_positions.append(player.y)
-        #     else:
-        #         ai_prev_x_pos = player.x
-        #         ai_prev_y_pos = player.y
-        # for player in cur_gamestate.gamestate.players:
-        #     if(cur_gamestate.player.id != player.id):
-        #         enemy_now_x_positions.append(player.x)
-        #         enemy_now_y_positions.append(player.y)
-        #     else:
-        #         ai_now_x_pos = player.x
-        #         ai_now_y_pos = player.y
-
-
-        # # print(enemy_prev_x_positions)
-        # # print(enemy_prev_y_positions)
-
-        # # print(enemy_now_x_positions)
-        # # print(enemy_now_y_positions)
-
-        # #Check if ai moved to an enemyhead
-        # for enemy_prev_x in enemy_prev_x_positions:
-        #     old_distance = abs(enemy_prev_x - ai_prev_x_pos)
-        #     new_distance = abs(enemy_prev_x - ai_now_x_pos)
-        #     if(new_distance < old_distance):
-        #         return True
-
-        # for enemy_prev_y in enemy_prev_y_positions:
-        #     old_distance = abs(enemy_prev_y - ai_prev_y_pos)
-        #     new_distance = abs(enemy_prev_y - ai_now_y_pos)
-        #     if(new_distance < old_distance):
-        #         return True
 
         return False
